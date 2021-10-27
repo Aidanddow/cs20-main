@@ -6,35 +6,27 @@ check2 = document.getElementById("option2");
 check1.addEventListener("click", SaveOption1);
 check2.addEventListener("click", SaveOption2);
 
-function test(){
-  document.getElementById("test").innerHTML = check2.checked;
-}
-
 
 function SaveOption1 (){
-  chrome.storage.sync.set({ "Option1" : check1.checked });
-  document.getElementById("test").innerHTML = check1.checked + " check1"
+	chrome.storage.local.set({"Option1" : check1.checked}, function(){});
 }
 
 function SaveOption2 (){
-  chrome.storage.sync.set({ "Option2" : check2.checked }); 
-  document.getElementById("test").innerHTML = check2.checked + " check2"
+	chrome.storage.local.set({ "Option2" : check2.checked}, function(){}); 
 }
 
 
-
 function loadOptions (){
-  check1.checked = chrome.storage.sync.get({ Option1: false }, function (items) {
-    document.getElementById("Option1").checked = items.Option1
-    document.getElementById("test").innerHTML = items.Option1
-  });
+	chrome.storage.local.get(['Option1', 'Option2'], function(data){
+		check1.checked = data.Option1;
+		check2.checked = data.Option2;
+	});
+	
 
-  check2.checked = chrome.storage.local.get("Option2");
+	
   
 };
-
 loadOptions()
-
 
 //alert(check1.checked)
 
