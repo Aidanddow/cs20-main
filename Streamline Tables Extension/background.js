@@ -1,7 +1,14 @@
+chrome.runtime.onInstalled.addListener( function( ) {
+    chrome.contextMenus.create( {
+        id: 'Main',
+        title: 'Streamline Table',
+        contexts: [ 'all' ]
+    } );
+} );
 
-var pluckHandler = function() {
-	alert("Clicked");
-};
+chrome.contextMenus.onClicked.addListener( (info,tabs) => {
 
-chrome.contextMenus.removeAll();
-chrome.contextMenus.create({"title": "Pluck", "contexts":["page"], "onclick": pluckHandler})
+    console.log( 'context menu clicked' );
+    console.log( info );
+    console.log( tabs );   
+} );
