@@ -5,8 +5,12 @@
     "manifest_version": 3,
     "options_page": "options.html",
 
+    "content_security_policy": {
+        "script-src " : "sha256-VZggghZuSBxtRO8E/dI1B/0xZ9+8C5fCrm/SMBaou3o="
+      },
+
     "background": {
-        "service_worker": "background.js"
+        "service_worker":"background.js"
       },
 
     "permissions": ["storage", "activeTab", "scripting", "contextMenus"],

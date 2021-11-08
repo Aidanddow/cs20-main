@@ -23,6 +23,9 @@ function loadOptions (){
 	});
 };
 
+console.log("THIS IS WORKING");
+
+
 
 loadOptions()
 
