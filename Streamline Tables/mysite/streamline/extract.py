@@ -1,35 +1,108 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 12 16:19:02 2021
-
-@author: L
-"""
-
-import requests
-import pandas as pd
-import urllib
-
-url = 'https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.114.010389?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed'
-header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
-
-'''       
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-          'Accept-Encoding': 'none',
-          'Accept-Language': 'en-US,en;q=0.8',
-          'Connection': 'keep-alive'}
-
-
-data = pd.read_html(url, header=header, attrs = {'class': 'article-table-content'})
-
-tablenum = len(data)
-print(tablenum)
+'''
+Need to install selenium and webdriver-manager in advance
+pip install selenium
+pip install webdriver-manager
 '''
 
-html = requests.get(url, headers=header).content
+import sys
+from selenium import webdriver
+from selenium.webdriver import ChromeOptions
+import time
+import xlwt
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
-'''Get all tables'''
-tables_list = pd.read_html(html)
-table = tables_list[-1]
-print(table)
-table.to_csv('table3.csv', encoding='utf_8_sig')
+
+def extract(urlFromDjango):
+
+    print("Reading", urlFromDjango)
+
+    option = ChromeOptions()
+    # option.add_argument('--window-size=1920,1080')
+    # option.add_argument('--headless')
+
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
+
+    #option.add_argument("--disable-blink-features=AutomationControlled")
+    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+        "source": """
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                })
+                """
+    })
+    driver.maximize_window()
+
+    try:
+        
+        url=urlFromDjango
+
+        driver.get(url)
+        time.sleep(3)
+
+        titles = driver.find_elements_by_tag_name('header')
+        titleList = []
+        for title in titles:
+            titleList.append(title.text)
+        
+        tableList = driver.find_elements_by_tag_name('table')
+        num=0;
+        for table in tableList:
+            num=num+1
+            
+            wbk = xlwt.Workbook()
+            sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
+            
+            dataListB = []
+            dataList = []
+
+            t = time.time()
+            theTime = int(round(t * 1000))
+            try: 
+                theadNodes= table.find_element_by_tag_name('thead').find_element_by_tag_name('tr').find_elements_by_tag_name('th')
+                for th in theadNodes:
+                    # print(th.text)
+                    dataList.append(th.text)
+            except Exception:
+                print("NO thead")
+
+            dataListB.append(dataList)
+            #print(dataArrayB)
+            tbodyNodes = table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
+            for tr in tbodyNodes:
+                dataTr=[]
+                tds=tr.find_elements_by_tag_name('td')
+                for td in tds:
+                    text=td.text
+                    if text=="":
+                        text='-'
+                    dataTr.append(text)
+                dataListB.append(dataTr)
+            '''
+            print(dataArrayB)
+            print(dataArrayB[0][2])
+            '''
+            print(titleList)
+            
+            # write title into excel
+            try:
+                if "Table" in titleList[num]:
+                    sheet.write(0,0,titleList[num])
+            except Exception:
+                pass
+            
+            # write every data into excel
+            for i in range(len(dataListB)):
+                for j in range(len(dataListB[i])):
+                    sheet.write(i+1, j, dataListB[i][j])
+
+            wbk.save('C:/Users/callu/Desktop/'+ str(num) + '.xls')
+
+
+    except Exception as error:
+        print("My Error:{0}".format(error))
+
+    finally:
+        time.sleep(5)
+        driver.quit()

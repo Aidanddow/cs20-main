@@ -5,7 +5,7 @@
 
 import json
 from django.http import JsonResponse , HttpResponse ####
-from . import Extract_HTML
+from . import extract
 
 
 
@@ -21,7 +21,7 @@ def get_page_data(request):
 
     data = {}
 
-    Extract_HTML.readURL(topic)
+    extract.extract(topic)
 
 
     return JsonResponse(data)
