@@ -11,9 +11,6 @@ Note: Please search to see if an issue already exists for the bug you encountere
 ## Current Behavior:
 <!-- A concise description of what you're experiencing. -->
 
-## Expected Behavior:
-<!-- A concise description of what you expected to happen. -->
-
 ### Steps to Reproduce
 <!--
 Example: steps to reproduce the behavior:
@@ -22,6 +19,11 @@ Example: steps to reproduce the behavior:
 3. Run '...'
 4. See error...
 -->
+
+## Expected Behavior:
+<!-- A concise description of what you expected to happen. -->
+
+
 
 #### Anything else:
 <!--
