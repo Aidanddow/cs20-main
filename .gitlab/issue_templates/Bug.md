@@ -2,16 +2,16 @@
 Note: Please search to see if an issue already exists for the bug you encountered.
 -->
 
-### Priority/Severity:
+#### Priority/Severity:
 
 - [ ] **High** (anything that impacts the normal user flow or blocks app usage)
 - [ ] **Medium** (anything that negatively affects the user experience)
 - [ ] **Low** (anything else e.g., typos, missing icons, layout issues, etc.)
 
-### Current Behavior:
+## Current Behavior:
 <!-- A concise description of what you're experiencing. -->
 
-### Expected Behavior:
+## Expected Behavior:
 <!-- A concise description of what you expected to happen. -->
 
 ### Steps to Reproduce
