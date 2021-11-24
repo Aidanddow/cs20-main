@@ -4,9 +4,9 @@ Note: Please search to see if an issue already exists for the bug you encountere
 
 #### Priority/Severity:
 
-- [ ] **High** (anything that impacts the normal user flow or blocks app usage)
-- [ ] **Medium** (anything that negatively affects the user experience)
-- [ ] **Low** (anything else e.g., typos, missing icons, layout issues, etc.)
+- [ ] **High** (Impacts the normal user flow or blocks app usage)
+- [ ] **Medium** (Negatively affects the user experience)
+- [ ] **Low** (Typos, missing icons, layout issues, etc.)
 
 ## Current Behavior:
 <!-- A concise description of what you're experiencing. -->
