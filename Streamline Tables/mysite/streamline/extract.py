@@ -4,7 +4,8 @@ pip install selenium
 pip install webdriver-manager
 '''
 
-import sys
+import sys, os
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 import time
@@ -97,8 +98,11 @@ def extract(urlFromDjango):
                 for j in range(len(dataListB[i])):
                     sheet.write(i+1, j, dataListB[i][j])
 
-            wbk.save('C:/Users/callu/Desktop/'+ str(num) + '.xls')
+            fname = f"{str(num)}.xls"
+            path = os.path.join(Path.home(), "Desktop", fname)
 
+            # wbk.save('C:/Users/callu/Desktop/'+ str(num) + '.xls')
+            wbk.save(path)
 
     except Exception as error:
         print("My Error:{0}".format(error))
