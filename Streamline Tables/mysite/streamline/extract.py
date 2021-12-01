@@ -8,6 +8,7 @@ import sys, os
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
+from selenium.webdriver.common.by import By
 import time
 import xlwt
 from webdriver_manager.chrome import ChromeDriverManager
@@ -33,7 +34,7 @@ def extract(urlFromDjango):
                 })
                 """
     })
-    driver.maximize_window()
+    driver.minimize_window()
 
     try:
         
@@ -42,16 +43,14 @@ def extract(urlFromDjango):
         driver.get(url)
         time.sleep(3)
 
-        titles = driver.find_elements_by_tag_name('header')
+        titles = driver.find_elements(By.TAG_NAME, "HEADER")
         titleList = []
         for title in titles:
             titleList.append(title.text)
         
-        tableList = driver.find_elements_by_tag_name('table')
-        num=0;
-        for table in tableList:
-            num=num+1
-            
+        tableList = driver.find_elements(By.TAG_NAME, "table")
+
+        for i, table in enumerate(tableList):
             wbk = xlwt.Workbook()
             sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
             
@@ -60,20 +59,23 @@ def extract(urlFromDjango):
 
             t = time.time()
             theTime = int(round(t * 1000))
+            
             try: 
-                theadNodes= table.find_element_by_tag_name('thead').find_element_by_tag_name('tr').find_elements_by_tag_name('th')
+                threadNodes = table.find_element(By.TAG_NAME, "thread").find_element(By.TAG_NAME, "tr").find_elements(By.TAG_NAME, "th")
                 for th in theadNodes:
                     # print(th.text)
                     dataList.append(th.text)
+            
             except Exception:
                 print("NO thead")
 
             dataListB.append(dataList)
             #print(dataArrayB)
-            tbodyNodes = table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
+        
+            tbodyNodes = table.find_element(By.TAG_NAME, "tbody").find_elements(By.TAG_NAME, "tr")
             for tr in tbodyNodes:
                 dataTr=[]
-                tds=tr.find_elements_by_tag_name('td')
+                tds=tr.find_elements(By.TAG_NAME, "td")
                 for td in tds:
                     text=td.text
                     if text=="":
@@ -88,8 +90,8 @@ def extract(urlFromDjango):
             
             # write title into excel
             try:
-                if "Table" in titleList[num]:
-                    sheet.write(0,0,titleList[num])
+                if "Table" in titleList[i]:
+                    sheet.write(0,0,titleList[i])
             except Exception:
                 pass
             
@@ -98,10 +100,9 @@ def extract(urlFromDjango):
                 for j in range(len(dataListB[i])):
                     sheet.write(i+1, j, dataListB[i][j])
 
-            fname = f"{str(num)}.xls"
+            fname = f"{str(i)}.xls"
             path = os.path.join(Path.home(), "Desktop", fname)
 
-            # wbk.save('C:/Users/callu/Desktop/'+ str(num) + '.xls')
             wbk.save(path)
 
     except Exception as error:
