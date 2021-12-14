@@ -10,13 +10,13 @@ To run by itself,
 import sys, os
 import time
 import xlwt
+import tkinter
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-
 
 '''
 Takes a url, finds all html tables and processes them,
@@ -32,22 +32,14 @@ def extract(url, target_path=None):
         driver.get(url)
 
         # Get titles of tables
-        titles = driver.find_elements(By.TAG_NAME, "HEADER")
+        global tableList
+        global titleList
+        titles = driver.find_elements(By.TAG_NAME, "header")
         titleList = [title.text for title in titles]
 
         tableList = driver.find_elements(By.TAG_NAME, "table")
 
-        for num, table in enumerate(tableList):
-            print(f"Processing Table {num+1}")
-            tableArray = process_table(table)
-
-            # If a title exists for this table, pass it
-            if len(titleList) > num:
-                title = titleList[num]
-            else:
-                title = None
-
-            write_to_xls(tableArray, num, title=title, path=target_path)
+        createUI()
         
         print("Finished Processing Tables!")
 
@@ -61,6 +53,40 @@ def extract(url, target_path=None):
         time.sleep(5)
         driver.quit()
 
+def download(the_path=None):
+    global tableList
+    global titleList
+    global uiList
+    selected_tables = []
+    for i in uiList.curselection():
+        selected_tables.append(uiList.get(i)[-1])
+    for num, table in enumerate(tableList):
+        if str(num+1) not in selected_tables:
+            break
+        
+        print(f"Processing Table {num+1}")
+        tableArray = process_table(table)
+
+        # If a title exists for this table, pass it
+        if len(titleList) > num and "Table" in titleList[num+1]:
+            title = titleList[num+1]
+        else:
+            title = None
+
+        write_to_xls(tableArray, num, title=title, path=the_path)
+
+def createUI():
+    top = tkinter.Tk()
+    global uiList
+    uiList = tkinter.Listbox(top, selectmode=tkinter.MULTIPLE)
+    for i in range(len(tableList)):
+        str1 = "Table " + str(i+1)
+        uiList.insert(tkinter.END, str1)
+    
+    button = tkinter.Button(top, text='Download', command=download)
+    button.pack(side='bottom')
+    uiList.pack()
+    top.mainloop()
 
 '''
 Takes a html table element and generates an array corresponding to the row and column data
@@ -70,7 +96,7 @@ def process_table(table):
 
     try: 
         # If there is table header information, retrieve it
-        theadNodes = table.find_element(By.TAG_NAME, "thead").find_element(By.TAG_NAME, "tr").find_elements(By.TAG_NAME, "th")
+        theadNodes = table.find_elements(By.TAG_NAME, "th")
         theadList = [th.text for th in theadNodes]
         dataList.append(theadList)
 
@@ -106,10 +132,11 @@ def write_to_xls(table, num, title=None, path=None):
     # Loop through arrays and write data into xls sheet
     for row_index, row in enumerate(table):
         for col_index, data in enumerate(row):
-            sheet.write(row_index, col_index, data)
+            sheet.write(row_index+1, col_index, data)
 
     # Save the file to "path/{num}.xls"
-    fname = f"table{num+1}.xls"
+    global doi
+    fname = f"table{num+1}_{doi}.xls"
 
     if path:
         path = os.path.join(path, fname)
@@ -150,6 +177,8 @@ def initialize_driver(headless=True):
 if __name__ == '__main__':
     try:
         url = sys.argv[1]
+        doi = url.split("doi")[1].split("?")[0][1:].replace("/", "_")
+        tableList, titleList, uiList = None, None, None
         extract(url)
     except:
         print("Please provide a URL")
