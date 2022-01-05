@@ -136,9 +136,6 @@ def write_to_xls(table, num, title=None, path=None):
 
     # Save the file to "path/{num}.xls"
     global doi
-    
-    ##TEMP
-    doi = "filename"
     fname = f"table{num+1}_{doi}.xls"
 
     if path:
@@ -184,5 +181,4 @@ if __name__ == '__main__':
         tableList, titleList, uiList = None, None, None
         extract(url)
     except:
-        doi = "website_name"
         print("Please provide a URL")
