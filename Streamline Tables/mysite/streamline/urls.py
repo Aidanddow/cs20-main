@@ -5,5 +5,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    url(r'^get_page_data/$', views.get_page_data, name='get_page_data'),
+    url(r'^get_page_data_HTML/$', views.get_page_data_HTML, name='get_page_data_HTML'),
+    url(r'get_page_data_image/$', views.get_page_data_image, name='get_page_data_image'),
+    url(r'get_page_data_pdf/$', views.get_page_data_pdf, name='get_page_data_pdf'),
 ]

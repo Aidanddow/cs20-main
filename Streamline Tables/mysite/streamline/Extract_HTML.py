@@ -1,6 +1,7 @@
 import urllib.request
 import ssl
 
+#prints all the html of a page from the url 
 def readURL(url):
 
     context = ssl._create_unverified_context()
