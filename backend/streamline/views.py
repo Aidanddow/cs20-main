@@ -22,7 +22,7 @@ def get_page_data_HTML(request):
 
     data = {}
 
-    #extract.extract(topic)
+    extract.extract(topic)
 
 
     return JsonResponse(data)
