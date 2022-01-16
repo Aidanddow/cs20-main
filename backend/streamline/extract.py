@@ -38,6 +38,10 @@ def extract(url, target_path=None):
         titleList = [title.text for title in titles]
 
         tableList = driver.find_elements(By.TAG_NAME, "table")
+        
+        # Get doi from url
+        global doi
+        doi = url.split("doi")[1].split("?")[0][1:].replace("/", "_")
 
         createUI()
         
@@ -62,15 +66,18 @@ def download(the_path=None):
         selected_tables.append(uiList.get(i)[-1])
     for num, table in enumerate(tableList):
         if str(num+1) not in selected_tables:
-            break
+            continue
         
         print(f"Processing Table {num+1}")
         tableArray = process_table(table)
 
         # If a title exists for this table, pass it
-        if len(titleList) > num and "Table" in titleList[num+1]:
-            title = titleList[num+1]
-        else:
+        try:
+            if len(titleList) > num and "Table" in titleList[num+1]:
+                title = titleList[num+1]
+            else:
+                title = None
+        except:
             title = None
 
         write_to_xls(tableArray, num, title=title, path=the_path)
