@@ -38,13 +38,18 @@ def get_page_data_image(request):
 
     return JsonResponse(data)
 
-def get_page_data_pdf(request):
-    topic = request.GET.get('topic', None)
+import os
 
-    print('topic-PDF:', topic)
+def get_page_data_pdf(request):
+    url = request.GET.get('topic', None)
+    pdf_name = os.path.basename(url)
 
     data = {}
-    #downloads pdf from right click
-    #download_pdf.download_file(topic)
-   
+
+    # downloads pdf from right click
+    download_pdf.download_file(url, pdf_name)
+
+    # convert its table(s) into csv(s)
+    download_pdf.get_csv_table_from_pdf(pdf_name)
+
     return JsonResponse(data)
