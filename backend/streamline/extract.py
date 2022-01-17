@@ -22,7 +22,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 Takes a url, finds all html tables and processes them,
 saving their data to xls files.
 '''
-def extract(url, target_path=None):
+def extract(url, save_path=None):
     print(f"Reading {url}")
 
     try:
@@ -36,19 +36,19 @@ def extract(url, target_path=None):
         global titleList
         titles = driver.find_elements(By.TAG_NAME, "header")
         titleList = [title.text for title in titles]
-
+        
         tableList = driver.find_elements(By.TAG_NAME, "table")
         
         # Get doi from url
         global doi
         doi = url.split("doi")[1].split("?")[0][1:].replace("/", "_")
 
-        createUI()
+        createUI(path=save_path)
         
         print("Finished Processing Tables!")
 
     except FileNotFoundError:
-        print(f"No folder \"{target_path}\" found")
+        print(f"No folder \"{save_path}\" found")
             
     except Exception as error:
         print("Error:", error)
@@ -57,7 +57,7 @@ def extract(url, target_path=None):
         time.sleep(5)
         driver.quit()
 
-def download(the_path=None):
+def download(path=None):
     global tableList
     global titleList
     global uiList
@@ -80,9 +80,9 @@ def download(the_path=None):
         except:
             title = None
 
-        write_to_xls(tableArray, num, title=title, path=the_path)
+        write_to_xls(tableArray, num, title=title, path=path)
 
-def createUI():
+def createUI(path):
     top = tkinter.Tk()
     global uiList
     uiList = tkinter.Listbox(top, selectmode=tkinter.MULTIPLE)
@@ -90,7 +90,7 @@ def createUI():
         str1 = "Table " + str(i+1)
         uiList.insert(tkinter.END, str1)
     
-    button = tkinter.Button(top, text='Download', command=download)
+    button = tkinter.Button(top, text='Download', command=lambda: download(path))
     button.pack(side='bottom')
     uiList.pack()
     top.mainloop()
@@ -145,13 +145,7 @@ def write_to_xls(table, num, title=None, path=None):
     global doi
     fname = f"table{num+1}_{doi}.xls"
 
-    if path:
-        path = os.path.join(path, fname)
-    else:
-        # Default to the desktop
-        path = os.path.join(Path.home(), "Desktop", fname)
-
-    path = os.path.join(Path.home(), "Desktop", fname)
+    path = os.path.join(path, fname)
     wbk.save(path)
     print(f"Saved table {num+1} to {path}")
     
@@ -186,6 +180,9 @@ if __name__ == '__main__':
         url = sys.argv[1]
         doi = url.split("doi")[1].split("?")[0][1:].replace("/", "_")
         tableList, titleList, uiList = None, None, None
-        extract(url)
-    except:
+
+        CSV_PATH = os.path.join(Path.home(), "Desktop")
+        extract(url, save_path=CSV_PATH)
+    except Exception as e:
+        print('Error', e)
         print("Please provide a URL")

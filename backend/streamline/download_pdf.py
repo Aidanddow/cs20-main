@@ -1,43 +1,46 @@
 '''
-Download pdf tables from terminal with
+Download tables from pdf from terminal with
 
 % python download_pdf.py <filename>
 '''
 
-import urllib.request
 import camelot 
 import sys
 import os
+import urllib.request
+from pathlib import Path
 
-# Need to mkdir files folder in current directory to work
-FOLDER = "files"
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'}
 
-#Simple script to download a pdf from a link - wont be used in project, just used 
-#to make sure the pdf is got, no filename handling
-def download_file(download_url, pdf_name):
-    response = urllib.request.urlopen(download_url)    
-    pdf_path = os.path.join(FOLDER, pdf_name) 
+# Simple script to download a pdf from a link - wont be used in project, just used 
+# to make sure the pdf is got, no filename handling
+def download_pdf(url, fname="pdf.pdf", save_path=None):
+
+    req = urllib.request.Request(url, headers=HEADERS)
+    response = urllib.request.urlopen(req)
+    path = os.path.join(save_path, fname)   
 
     print("--- Downloading pdf")
         
-    with open(pdf_path, 'wb') as file:
+    with open(path, 'wb') as file:
         file.write(response.read())
-    
-    return pdf_path
+
+    return path
 
 
-def download_pdf_tables(pdf_path, pages="all"):
+def download_pdf_tables(pdf_path, save_path=None, pages="all"):
     print("--- Checking for tables") 
     tables = camelot.read_pdf(pdf_path, pages=pages, flavor="stream", edge_tol=100)
 
     if len(tables) > 0:
         print(f"--- Saving {len(tables)} tables to CSV")
-        csv_path = os.path.join(FOLDER, "table.csv")
-        tables.export(csv_path, f='csv', compress=False)
-        print(f"--- CSV files saved to {csv_path}")
+
+        path = os.path.join(save_path, "table.csv")   
+        tables.export(path, f='csv', compress=False)
+        
+        print(f"--- {len(tables)} CSV files saved to {path}")
     else:
         print("--- No tables found")
-
 
 
 # Temporary main method to download pdf tables from terminal
