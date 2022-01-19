@@ -40,16 +40,25 @@ def extract(url, save_path=None):
         # Get doi from url (Not Working)
         global doi
         doi = extract_doi(url)
+
+        tables_json = []
         
         for num, table in enumerate(tableList):
             print(f"--- Processing Table {num+1}")
-            tableArray = process_table(table)
+            title = titleList[num] if len(titleList) > num else ""
+
+            tableString = title + process_table(table)
+            tables_json.append({
+                'table-number': num,
+                'table-csv': tableString})
 
             # If a title exists for this table, pass it
-            title = titleList[num] if len(titleList) > num else None
-            write_to_csv(tableArray, num, title=title, path=save_path)
+            # title = titleList[num] if len(titleList) > num else None
+            # fname = write_to_csv(tableString, num, title=title, path=save_path)
+            # tables.append(fname)
         
         print("--- Finished Processing Tables!")
+        return tables_json
 
     except FileNotFoundError:
         print(f"--- No folder \"{save_path}\" found")
@@ -65,12 +74,12 @@ def extract(url, save_path=None):
 Takes a html table element and generates an array corresponding to the row and column data
 '''
 def process_table(table):
-    dataList  = []
+    dataString  = ""
 
     try: 
         theadNodes = table.find_elements(By.TAG_NAME, "th")
-        theadList = [th.text for th in theadNodes]
-        dataList.append(theadList)
+        theadCSV = ",".join([th.text for th in theadNodes])
+        dataString += theadCSV
 
     # No table header information
     except NoSuchElementException:
@@ -83,10 +92,10 @@ def process_table(table):
         tds = tr.find_elements(By.TAG_NAME, "td")
 
         # Get the text for each cell, replacing empty strings with a dash
-        dataTr = [t.text if t.text != "" else "-" for t in tds]
-        dataList.append(dataTr)
+        dataTr = ",".join([t.text if t.text != "" else "-" for t in tds])
+        dataString += dataTr + "\n"
 
-    return dataList
+    return dataString
     
     
 '''
@@ -94,19 +103,18 @@ Takes a 2D array and writes the data to an xls file in the Desktop
 '''
 
 def write_to_csv(table, num, title=None, path=None):
-    csv = title + "\n" if title else ""
-    
-    table = [",".join(i) for i in table]
-    csv += "\n".join(table)
 
     global doi
     fname = f"table{num+1}_{doi}.csv"
 
     path = os.path.join(path, fname)
     with open(path, "w") as f:
-        f.write(csv)
+        f.write(title + "\n" if title else "")
+        f.write(table)
 
     print(f"--- Saved table {num+1} to {path}")
+
+    return path
 
     
 '''

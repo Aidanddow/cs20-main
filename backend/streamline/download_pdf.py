@@ -37,7 +37,7 @@ def download_pdf_tables(pdf_path, save_path=None, pages="all"):
 
         path = os.path.join(save_path, "table.csv")   
         tables.export(path, f='csv', compress=False)
-        
+ 
         print(f"--- {len(tables)} CSV files saved to {path}")
     else:
         print("--- No tables found")
