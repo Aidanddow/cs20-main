@@ -9,7 +9,6 @@ To run by itself,
 
 import sys, os
 import time
-import xlwt
 import tkinter
 from pathlib import Path
 from selenium import webdriver
@@ -23,77 +22,44 @@ Takes a url, finds all html tables and processes them,
 saving their data to xls files.
 '''
 def extract(url, save_path=None):
-    print(f"Reading {url}")
+    print(f"--- Reading {url}")
 
     try:
         driver = initialize_driver()
 
         # Go to url
         driver.get(url)
+        print()
 
         # Get titles of tables
-        global tableList
-        global titleList
         titles = driver.find_elements(By.TAG_NAME, "header")
         titleList = [title.text for title in titles]
-        
+
         tableList = driver.find_elements(By.TAG_NAME, "table")
         
-        # Get doi from url
+        # Get doi from url (Not Working)
         global doi
-        doi = url.split("doi")[1].split("?")[0][1:].replace("/", "_")
-
-        createUI(path=save_path)
+        doi = extract_doi(url)
         
-        print("Finished Processing Tables!")
+        for num, table in enumerate(tableList):
+            print(f"--- Processing Table {num+1}")
+            tableArray = process_table(table)
+
+            # If a title exists for this table, pass it
+            title = titleList[num] if len(titleList) > num else None
+            write_to_csv(tableArray, num, title=title, path=save_path)
+        
+        print("--- Finished Processing Tables!")
 
     except FileNotFoundError:
-        print(f"No folder \"{save_path}\" found")
+        print(f"--- No folder \"{save_path}\" found")
             
     except Exception as error:
-        print("Error:", error)
+        print("--- Error:", error)
 
     finally:
         time.sleep(5)
         driver.quit()
-
-def download(path=None):
-    global tableList
-    global titleList
-    global uiList
-    selected_tables = []
-    for i in uiList.curselection():
-        selected_tables.append(uiList.get(i)[-1])
-    for num, table in enumerate(tableList):
-        if str(num+1) not in selected_tables:
-            continue
-        
-        print(f"Processing Table {num+1}")
-        tableArray = process_table(table)
-
-        # If a title exists for this table, pass it
-        try:
-            if len(titleList) > num and "Table" in titleList[num+1]:
-                title = titleList[num+1]
-            else:
-                title = None
-        except:
-            title = None
-
-        write_to_xls(tableArray, num, title=title, path=path)
-
-def createUI(path):
-    top = tkinter.Tk()
-    global uiList
-    uiList = tkinter.Listbox(top, selectmode=tkinter.MULTIPLE)
-    for i in range(len(tableList)):
-        str1 = "Table " + str(i+1)
-        uiList.insert(tkinter.END, str1)
-    
-    button = tkinter.Button(top, text='Download', command=lambda: download(path))
-    button.pack(side='bottom')
-    uiList.pack()
-    top.mainloop()
 
 '''
 Takes a html table element and generates an array corresponding to the row and column data
@@ -102,11 +68,11 @@ def process_table(table):
     dataList  = []
 
     try: 
-        # If there is table header information, retrieve it
         theadNodes = table.find_elements(By.TAG_NAME, "th")
         theadList = [th.text for th in theadNodes]
         dataList.append(theadList)
 
+    # No table header information
     except NoSuchElementException:
         pass
     
@@ -126,30 +92,23 @@ def process_table(table):
 '''
 Takes a 2D array and writes the data to an xls file in the Desktop
 '''
-def write_to_xls(table, num, title=None, path=None):
-    
-    # Initialize the workbook and add a sheet
-    wbk = xlwt.Workbook()
-    sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
-    
-    # Write title into excel
-    if title:
-        sheet.write(0, 0, title)
-    
-    # Loop through arrays and write data into xls sheet
-    for row_index, row in enumerate(table):
-        for col_index, data in enumerate(row):
-            sheet.write(row_index+1, col_index, data)
 
-    # Save the file to "path/{num}.xls"
+def write_to_csv(table, num, title=None, path=None):
+    csv = title + "\n" if title else ""
+    
+    table = [",".join(i) for i in table]
+    csv += "\n".join(table)
+
     global doi
-    fname = f"table{num+1}_{doi}.xls"
+    fname = f"table{num+1}_{doi}.csv"
 
     path = os.path.join(path, fname)
-    wbk.save(path)
-    print(f"Saved table {num+1} to {path}")
-    
+    with open(path, "w") as f:
+        f.write(csv)
 
+    print(f"--- Saved table {num+1} to {path}")
+
+    
 '''
  Initializes and returns the web driver
 '''
@@ -174,15 +133,30 @@ def initialize_driver(headless=True):
         })
     return driver
 
+'''
+Should extract the doi from a url (Not Working)
+'''
+def extract_doi(url):
+    # URL will be formatted as follows
+    # http:://website.domain/path?doi
+    try:
+        doi = url.split("doi")[1]
+        doi = doi.split("?")[0][1:]
+        doi = doi.replace("/","_")
+    except IndexError:
+        doi = ""
+
+    return doi
+    
+
 
 if __name__ == '__main__':
     try:
         url = sys.argv[1]
-        doi = url.split("doi")[1].split("?")[0][1:].replace("/", "_")
-        tableList, titleList, uiList = None, None, None
+        doi = extract_doi(url)
 
         CSV_PATH = os.path.join(Path.home(), "Desktop")
         extract(url, save_path=CSV_PATH)
+
     except Exception as e:
-        print('Error', e)
-        print("Please provide a URL")
+        print('--- Error', e)
