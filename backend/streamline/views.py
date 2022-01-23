@@ -1,9 +1,12 @@
+from asyncio import base_events
 import json
 import os
 import urllib.parse
+import mimetypes
 from pathlib import Path
 from django.http import JsonResponse , HttpResponse
 from . import extract, download_image, download_pdf
+from django.conf import settings
 
 # Path to which resulting csv files will be saved 
 CSV_PATH = os.path.join(Path.home(), "Desktop")
@@ -56,3 +59,22 @@ def get_page_data_image(request):
 
     data = {}
     return JsonResponse(data)
+
+
+#using url /download_file will download a sample text file, fixed file right now 
+def download_file(request):
+    
+
+    print("Download\n")
+    print(settings.BASE_DIR)
+
+    fl_path = 'streamline/files'
+    filename = 'Names.txt'
+    filepath = os.path.join(settings.BASE_DIR, fl_path, filename)
+    print(filepath)
+
+    fl = open(filepath, 'r')
+    mime_type, _ = mimetypes.guess_type(fl_path)
+    response = HttpResponse(fl, content_type=mime_type)
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response
