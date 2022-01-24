@@ -47,6 +47,7 @@ def extract(url, save_path=None):
             write_to_csv(tableArray, num, title=title, path=save_path)
         
         print("--- Finished Processing Tables!")
+        driver.quit()
 
     except FileNotFoundError:
         print(f"--- No folder \"{save_path}\" found")
@@ -54,8 +55,7 @@ def extract(url, save_path=None):
     except Exception as error:
         print("--- Error:", error)
 
-    finally:
-        driver.quit()
+        
 
 '''
 Takes a html table element and generates an array corresponding to the row and column data

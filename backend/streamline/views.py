@@ -80,5 +80,23 @@ def create_file_response(file_path):
         response['Content-Disposition'] = f"attachment; filename={fname}"
         return response
 
-def get_fname(path):
-    return path.split("/")[-1]
+
+#using url /download_file will download a sample text file, fixed file right now 
+def download_file(request):
+    
+
+    print("Download\n")
+    print(settings.BASE_DIR)
+
+    fl_path = 'streamline/files'
+    filename = 'Names.txt'
+    filepath = os.path.join(settings.BASE_DIR, fl_path, filename)
+    print(filepath)
+
+    fl = open(filepath, 'r')
+    mime_type, _ = mimetypes.guess_type(fl_path)
+    response = HttpResponse(fl, content_type=mime_type)
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response
+
+
