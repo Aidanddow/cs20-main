@@ -23,5 +23,5 @@ urlpatterns = [
     path('streamline/', include('streamline.urls')),
     path('admin/', admin.site.urls),
     path('', views.index),
-    path('download/', views.download_file)
+    path('download/', views.create_file_response)
 ]

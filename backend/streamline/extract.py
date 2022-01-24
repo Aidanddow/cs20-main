@@ -26,10 +26,7 @@ def extract(url, save_path=None):
 
     try:
         driver = initialize_driver()
-
-        # Go to url
         driver.get(url)
-        print()
 
         # Get titles of tables
         titles = driver.find_elements(By.TAG_NAME, "header")
@@ -58,7 +55,6 @@ def extract(url, save_path=None):
         print("--- Error:", error)
 
     finally:
-        time.sleep(5)
         driver.quit()
 
 '''

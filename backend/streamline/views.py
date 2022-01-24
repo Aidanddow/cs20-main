@@ -9,7 +9,8 @@ from . import extract, download_image, download_pdf
 from django.conf import settings
 
 # Path to which resulting csv files will be saved 
-CSV_PATH = os.path.join(Path.home(), "Desktop")
+CSV_PATH = os.path.join(Path.home(), "Desktop", "files")
+CSV_PATH = settings.CSV_DIR
 
 def index(request):
     return HttpResponse("Hello World! Server is up and running")
@@ -21,9 +22,12 @@ def get_page_data_HTML(request):
     url = request.GET.get('topic', None)
     print('topic-HTML:', url)
     extract.extract(url, save_path=CSV_PATH)
+    first_file = os.listdir(CSV_PATH)[0]
+    first_file_path = os.path.join(CSV_PATH, first_file)
 
-    data = {}
-    return JsonResponse(data)
+    response = create_file_response(first_file_path)
+    print(response.content)
+    return response
 
 '''
 Extracts table data from PDF
@@ -43,8 +47,10 @@ def get_page_data_pdf(request):
     download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH)
     os.remove(pdf_path)
 
-    data = {}
-    return JsonResponse(data)
+    first_file = os.listdir(CSV_PATH)[0]
+    response = create_file_response(first_file)
+    print(response)
+    return response
 
 '''
  Extracts table data from images 
@@ -61,20 +67,18 @@ def get_page_data_image(request):
     return JsonResponse(data)
 
 
-#using url /download_file will download a sample text file, fixed file right now 
-def download_file(request):
-    
+# Creates a HttpResponse with a file attatched
+def create_file_response(file_path):
+    print(f"--- Sending file {file_path} as HttpResponse")
 
-    print("Download\n")
-    print(settings.BASE_DIR)
+    # guess_type() returns a tuple (type, encoding) we disregard the encoding
+    mime_type, _ = mimetypes.guess_type(file_path)
+    fname = os.path.basename(file_path)
 
-    fl_path = 'streamline/files'
-    filename = 'Names.txt'
-    filepath = os.path.join(settings.BASE_DIR, fl_path, filename)
-    print(filepath)
+    with open(file_path, 'r') as file:
+        response = HttpResponse(file, content_type=mime_type)
+        response['Content-Disposition'] = f"attachment; filename={fname}"
+        return response
 
-    fl = open(filepath, 'r')
-    mime_type, _ = mimetypes.guess_type(fl_path)
-    response = HttpResponse(fl, content_type=mime_type)
-    response['Content-Disposition'] = "attachment; filename=%s" % filename
-    return response
+def get_fname(path):
+    return path.split("/")[-1]
