@@ -8,8 +8,7 @@ from django.http import JsonResponse , HttpResponse
 from . import extract, download_image, download_pdf
 from django.conf import settings
 
-# Path to which resulting csv files will be saved 
-CSV_PATH = os.path.join(Path.home(), "Desktop", "files")
+# Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
 
 def index(request):
@@ -83,7 +82,6 @@ def create_file_response(file_path):
 
 #using url /download_file will download a sample text file, fixed file right now 
 def download_file(request):
-    
 
     print("Download\n")
     print(settings.BASE_DIR)
