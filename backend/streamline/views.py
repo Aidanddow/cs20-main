@@ -21,7 +21,9 @@ def get_page_data_HTML(request):
     url = request.GET.get('topic', None)
     print('topic-HTML:', url)
     extract.extract(url, save_path=CSV_PATH)
+    
     first_file = os.listdir(CSV_PATH)[0]
+    
     first_file_path = os.path.join(CSV_PATH, first_file)
 
     response = create_file_response(first_file_path)
@@ -47,7 +49,9 @@ def get_page_data_pdf(request):
     os.remove(pdf_path)
 
     first_file = os.listdir(CSV_PATH)[0]
-    response = create_file_response(first_file)
+    file_path = os.path.join(CSV_PATH, first_file)   
+
+    response = create_file_response(file_path)
     print(response)
     return response
 
