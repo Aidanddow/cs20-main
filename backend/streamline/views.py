@@ -35,7 +35,10 @@ Extracts table data from PDF
 '''
 def get_page_data_pdf(request):
     url = request.GET.get('topic', None)
+    pages = request.GET.get('pages', None)
+
     print('topic-PDF:', url)
+    print('pages-PDF:', pages)
 
     # Gets name of pdf file currently being viewed, decodes it
     pdf_name = os.path.basename(url)
@@ -45,7 +48,7 @@ def get_page_data_pdf(request):
     pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
 
     # convert its table(s) into csv(s)
-    download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH)
+    download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH, pages=pages)
     os.remove(pdf_path)
 
     first_file = os.listdir(CSV_PATH)[0]

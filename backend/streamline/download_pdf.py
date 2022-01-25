@@ -29,7 +29,7 @@ def download_pdf(url, fname="pdf.pdf", save_path=None):
 
 
 def download_pdf_tables(pdf_path, save_path=None, pages="all"):
-    print("--- Checking for tables") 
+    print("--- Checking for tables in page", pages) 
     tables = camelot.read_pdf(pdf_path, pages=pages, flavor="stream", edge_tol=100)
 
     if len(tables) > 0:

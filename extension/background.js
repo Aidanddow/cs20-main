@@ -53,7 +53,10 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 		}else if (url.includes(".pdf")) {
 
 			console.log("PDF Page")
-			var url = serverhost + '/streamline/get_page_data_pdf/?topic='+ encodeURIComponent(url);
+
+			let pages = prompt("Please insert the table page (or pages divided by a '-')", "all");
+
+			var url = serverhost + '/streamline/get_page_data_pdf/?topic='+ encodeURIComponent(url)+'&pages='+pages;
 
 			fetch(url)
 				.then(response => response.json())
