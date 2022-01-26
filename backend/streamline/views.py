@@ -27,7 +27,7 @@ def get_page_data_HTML(request):
     first_file_path = os.path.join(CSV_PATH, first_file)
 
     response = create_file_response(first_file_path)
-    print(response.content)
+    #print(response.content)
     return response
 
 '''
@@ -88,9 +88,10 @@ def create_file_response(file_path):
 
 
 #using url /download_file will download a sample text file, fixed file right now 
-def download_file(request):
+def download_file(request, file_id):
 
     print("Download\n")
+    print(file_id)
     print(settings.BASE_DIR)
 
     fl_path = 'streamline/files'
