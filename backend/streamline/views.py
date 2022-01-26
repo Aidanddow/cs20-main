@@ -22,11 +22,11 @@ def get_page_data_HTML(request):
     url = request.GET.get('topic', None)
     print('topic-HTML:', url)
     extract.extract(url, save_path=CSV_PATH)
-
-    zipPath = create_zip(CSV_PATH)
-    response = create_file_response(zipPath)
+    filePath = get_file_to_send(folder=CSV_PATH)
+    response = create_file_response(filePath)
     
-    print(response.content)
+    print(response)
+    clear_folder(CSV_PATH)
     return response
 
 '''
@@ -48,12 +48,13 @@ def get_page_data_pdf(request):
 
     # convert its table(s) into csv(s)
     download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH, pages=pages)
-    os.remove(pdf_path)
 
-    zipPath = create_zip(CSV_PATH)
-    response = create_file_response(zipPath)
+    filePath = zip_or_csv(CSV_PATH)
+    response = create_file_response(filePath)
 
     print(response)
+    clear_folder(CSV_PATH)
+
     return response
 
 '''
@@ -71,7 +72,9 @@ def get_page_data_image(request):
     return JsonResponse(data)
 
 
-# Creates a HttpResponse with a file attatched
+'''
+Creates a HttpResponse with a file attatched, and returns the response
+'''
 def create_file_response(file_path):
     print(f"--- Sending file {file_path} as HttpResponse")
 
@@ -79,43 +82,53 @@ def create_file_response(file_path):
     mime_type, _ = mimetypes.guess_type(file_path)
     fname = os.path.basename(file_path)
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'rb') as file:
         response = HttpResponse(file, content_type=mime_type)
-        response['Content-Disposition'] = f"attachment; filename={fname}"
+        response['Content-Disposition'] = f'attachment; filename={fname}'
         return response
 
 
-#using url /download_file will download a sample text file, fixed file right now 
-def download_file(request):
-
-    print("Download\n")
-    print(settings.BASE_DIR)
-
-    fl_path = 'streamline/files'
-    filename = 'Names.txt'
-    filepath = os.path.join(settings.BASE_DIR, fl_path, filename)
-    print(filepath)
-
-    fl = open(filepath, 'r')
-    mime_type, _ = mimetypes.guess_type(fl_path)
-    response = HttpResponse(fl, content_type=mime_type)
-    response['Content-Disposition'] = "attachment; filename=%s" % filename
-    return response
-
-
-
+'''
+Will create and return the path to a zip file of all csv files in folder
+'''
 def create_zip(folder):
-    
-    zipPath = os.path.join(CSV_PATH, "tables.zip")
-    zipFile = ZipFile(zipPath, 'w')
+    os.chdir(folder)
+    zipPath = "tables.zip"
 
-    # Add multiple files to the zip
-    for csv in os.listdir(folder):
-        if csv.endswith(".csv"):
-            zipFile.write(os.path.join(CSV_PATH, csv))
+    with ZipFile(zipPath, 'w') as zipFile:
 
-    zipFile.close()
-    return zipPath
+        # Add multiple files to the zip
+        csv_files = (file for file in os.listdir(folder) if file.endswith('.csv'))
+        
+        for file in csv_files:
+            zipFile.write(file)
+
+    return os.path.abspath(zipPath)
+
+'''
+zip_or_csv() returns a filepath which can be one of two cases
+    1. There is only one csv file in folder -> Return the path of the file
+    2. There are multiple csv files in folder -> Create a zip archive of files and return that
+'''
+def zip_or_csv(folder):
+    csv_files = [file for file in os.listdir(folder) if file.endswith(".csv")]
+
+    if len(csv_files) == 1:
+        return os.path.join(CSV_PATH, csv_files[0])
+    else:
+        return create_zip(CSV_PATH)
+
+'''
+Deletes all files in folder
+'''
+def clear_folder(folder):
+    os.chdir(folder)
+    for file in os.listdir(folder):
+        os.remove(file)
+
+
+def download_file(request):
+    pass
     
 
 
