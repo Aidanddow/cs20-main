@@ -22,20 +22,11 @@ def get_page_data_HTML(request):
     url = request.GET.get('topic', None)
     print('topic-HTML:', url)
     extract.extract(url, save_path=CSV_PATH)
-    filePath = get_file_to_send(folder=CSV_PATH)
+    filePath = zip_or_csv(folder=CSV_PATH)
     response = create_file_response(filePath)
     
-<<<<<<< HEAD
     print(response)
     clear_folder(CSV_PATH)
-=======
-    first_file = os.listdir(CSV_PATH)[0]
-    
-    first_file_path = os.path.join(CSV_PATH, first_file)
-
-    response = create_file_response(first_file_path)
-    #print(response.content)
->>>>>>> 78fceae67edeab4477203bfb1fea7f78816c351a
     return response
 
 '''
@@ -97,7 +88,6 @@ def create_file_response(file_path):
         return response
 
 
-<<<<<<< HEAD
 '''
 Will create and return the path to a zip file of all csv files in folder
 '''
@@ -106,14 +96,6 @@ def create_zip(folder):
     zipPath = "tables.zip"
 
     with ZipFile(zipPath, 'w') as zipFile:
-=======
-#using url /download_file will download a sample text file, fixed file right now 
-def download_file(request, file_id):
-
-    print("Download\n")
-    print(file_id)
-    print(settings.BASE_DIR)
->>>>>>> 78fceae67edeab4477203bfb1fea7f78816c351a
 
         # Add multiple files to the zip
         csv_files = (file for file in os.listdir(folder) if file.endswith('.csv'))
