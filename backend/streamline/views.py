@@ -3,6 +3,7 @@ import json
 import os
 import urllib.parse
 import mimetypes
+from zipfile import ZipFile
 from pathlib import Path
 from django.http import JsonResponse , HttpResponse
 from . import extract, download_image, download_pdf
@@ -21,12 +22,10 @@ def get_page_data_HTML(request):
     url = request.GET.get('topic', None)
     print('topic-HTML:', url)
     extract.extract(url, save_path=CSV_PATH)
-    
-    first_file = os.listdir(CSV_PATH)[0]
-    
-    first_file_path = os.path.join(CSV_PATH, first_file)
 
-    response = create_file_response(first_file_path)
+    zipPath = create_zip(CSV_PATH)
+    response = create_file_response(zipPath)
+    
     print(response.content)
     return response
 
@@ -51,10 +50,9 @@ def get_page_data_pdf(request):
     download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH, pages=pages)
     os.remove(pdf_path)
 
-    first_file = os.listdir(CSV_PATH)[0]
-    file_path = os.path.join(CSV_PATH, first_file)   
+    zipPath = create_zip(CSV_PATH)
+    response = create_file_response(zipPath)
 
-    response = create_file_response(file_path)
     print(response)
     return response
 
@@ -103,5 +101,22 @@ def download_file(request):
     response = HttpResponse(fl, content_type=mime_type)
     response['Content-Disposition'] = "attachment; filename=%s" % filename
     return response
+
+
+
+def create_zip(folder):
+    
+    zipPath = os.path.join(CSV_PATH, "tables.zip")
+    zipFile = ZipFile(zipPath, 'w')
+
+    # Add multiple files to the zip
+    for csv in os.listdir(folder):
+        if csv.endswith(".csv"):
+            zipFile.write(os.path.join(CSV_PATH, csv))
+
+    zipFile.close()
+    return zipPath
+    
+
 
 
