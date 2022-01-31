@@ -9,7 +9,7 @@ To run by itself,
 
 import sys, os
 import time
-import tkinter
+import xlwt
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -40,11 +40,18 @@ def extract(url, save_path=None):
         
         for num, table in enumerate(tableList):
             print(f"--- Processing Table {num+1}")
-            tableArray = process_table(table)
+            tableArray, formattedData = process_table(table)
 
             # If a title exists for this table, pass it
-            title = titleList[num] if len(titleList) > num else None
-            write_to_csv(tableArray, num, title=title, path=save_path)
+            try:
+                if len(titleList) > num and "Table" in titleList[num+1]:
+                    title = titleList[num+1]
+                else:
+                    title = None
+            except:
+                title = None
+            
+            write_to_csv(tableArray, formattedData, num, title=title, path=save_path)
         
         print("--- Finished Processing Tables!")
         driver.quit()
@@ -62,6 +69,7 @@ Takes a html table element and generates an array corresponding to the row and c
 '''
 def process_table(table):
     dataList  = []
+    formattedDataList = []
 
     try: 
         theadNodes = table.find_elements(By.TAG_NAME, "th")
@@ -81,27 +89,63 @@ def process_table(table):
         # Get the text for each cell, replacing empty strings with a dash
         dataTr = [t.text if t.text != "" else "-" for t in tds]
         dataList.append(dataTr)
+    
+    # Get data in bold and italics format
+    try: 
+        boldNodes1 = table.find_elements(By.TAG_NAME, "strong")
+        boldNodes2 = table.find_elements(By.TAG_NAME, "b")
+        italicsNode = table.find_elements(By.TAG_NAME, "i")
+        boldList = [bold.text for bold in boldNodes1]
+        for bold in boldNodes2:
+            boldList.append(bold.text)
+        italicsList = [i.text for i in italicsNode]
+        
+        formattedDataList.append(boldList)
+        formattedDataList.append(italicsList)
+        
+    except NoSuchElementException:
+        pass
 
-    return dataList
+    return dataList, formattedDataList
     
     
 '''
 Takes a 2D array and writes the data to an xls file in the Desktop
 '''
 
-def write_to_csv(table, num, title=None, path=None):
-    csv = title + "\n" if title else ""
+def write_to_csv(table, formattedData, num, title=None, path=None):
+    wbk = xlwt.Workbook()
+    sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
     
-    table = [",".join(i) for i in table]
-    csv += "\n".join(table)
+    # font and style
+    style = xlwt.XFStyle()
+    font = xlwt.Font()
+    
+    
+    # Write title into excel
+    if title:
+        sheet.write(0, 0, title)
+    
+    # Loop through arrays and write data into xls sheet
+    for row_index, row in enumerate(table):
+        for col_index, data in enumerate(row):
+            if data in formattedData[0]:
+                font.bold = True
+                style.font = font
+                sheet.write(row_index+1, col_index, data, style=style)
+            elif data in formattedData[1]:
+                font.italic = True
+                style.font = font
+                sheet.write(row_index+1, col_index, data, style=style)
+            else:
+                sheet.write(row_index+1, col_index, data)
 
+    # Save the file to "path/{num}.xls"
     global doi
-    fname = f"table{num+1}_{doi}.csv"
+    fname = f"table{num+1}_{doi}.xls"
 
     path = os.path.join(path, fname)
-    with open(path, "w") as f:
-        f.write(csv)
-
+    wbk.save(path)
     print(f"--- Saved table {num+1} to {path}")
 
     
@@ -130,7 +174,8 @@ def initialize_driver(headless=True):
     return driver
 
 '''
-Should extract the doi from a url (Not Working)
+Should extract the doi from a url
+(Working for url of papers because only papers have doi)
 '''
 def extract_doi(url):
     # URL will be formatted as follows
