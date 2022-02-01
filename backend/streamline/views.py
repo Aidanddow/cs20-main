@@ -11,10 +11,13 @@ from django.template import context
 from markupsafe import re
 from . import extract, download_image, download_pdf
 from django.conf import settings
+
 from django.shortcuts import render
 
 from streamline.models import Url_table, Tables
 from streamline.forms import *
+
+import re 
 
 # Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
@@ -67,33 +70,39 @@ def get_page_data_pdf(request):
     print('topic-PDF:', url)
     print('pages-PDF:', pages)
 
-    # Gets name of pdf file currently being viewed, decodes it
-    pdf_name = os.path.basename(url)
-    pdf_name = urllib.parse.unquote(pdf_name)
+    regex = "^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$|^all$/g"
 
     #store URL
     page = Url_table.objects.create(url=url)
     page_id = page.id
-    
-    # downloads pdf from right click
-    pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
-    # convert its table(s) into csv(s) and get table count
-    table_count = download_pdf.download_pdf_tables(pdf_path, page_id, save_path=CSV_PATH, pages=pages)
-    
-    #store each table from page
-    for i in range(table_count):
-        Tables.objects.create(Url_Id=page, Table_Id=(i + 1))
-   
-   
-   #inforamtion to pass to the webpage
-    Web_Page_Url = Url_table.objects.filter(id = page_id)
-    Web_Page_Tables = Tables.objects.filter(Url_Id = page_id)
 
-    context_dict = {}
-    context_dict["id"] = page_id
-    context_dict["Web_Page_Url"] = Web_Page_Url
-    context_dict["Web_Page_Tables"] = Web_Page_Tables
-    context_dict["table_count"] = table_count
+    # Check if page input is valid
+    if (re.search(regex, pages)):
+
+        print("Valid input")
+
+        # Gets name of pdf file currently being viewed, decodes it
+        pdf_name = os.path.basename(url)
+        pdf_name = urllib.parse.unquote(pdf_name)
+
+        #downloads pdf from right click
+        pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
+        #convert its table(s) into csv(s) and get table count
+        table_count = download_pdf.download_pdf_tables(pdf_path, page_id, save_path=CSV_PATH, pages=pages)
+        
+        #store each table from page
+        for i in range(table_count):
+            Tables.objects.create(Url_Id=page, Table_Id=(i + 1))
+
+         #inforamtion to pass to the webpage
+        Web_Page_Url = Url_table.objects.filter(id = page_id)
+        Web_Page_Tables = Tables.objects.filter(Url_Id = page_id)
+
+        context_dict = {}
+        context_dict["id"] = page_id
+        context_dict["Web_Page_Url"] = Web_Page_Url
+        context_dict["Web_Page_Tables"] = Web_Page_Tables
+        context_dict["table_count"] = table_count
 
     return render(request, 'streamline/preview_page.html', context=context_dict)
 

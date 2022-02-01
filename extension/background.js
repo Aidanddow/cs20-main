@@ -52,16 +52,30 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 		//dosent check what type of pdf
 		}else if (url.includes(".pdf")) {
 
-			let pages = prompt("Please insert the table page (or pages divided by a '-')", "all");
+			prompt_text = "Please insert the table page(s)\n\n- multiple pages   ->  1,2,3,4 \n- ranges   ->  4-10 \n- both   ->  1,3-8,12\n";
+			const regex = /^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$|^all$/g	
+			
+			let pages = prompt(prompt_text, "all");
+			
+			while(pages && !regex.test(pages)){
+				alert("Please insert valid values!");
+				pages = prompt(prompt_text, "all");
+			}
 
-			chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_pdf/?topic='+ encodeURIComponent(url)+'&pages='+pages});
+			pages = pages.replace(/\s/g, '')
+			
+			if(pages){
+				chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_pdf/?topic='+ encodeURIComponent(url)+'&pages='+pages});
 
-			fetch(url)
-				.then(response => response.json())
-				.then(response => sendResponse({farewell: response}))
-				.catch(error => console.log(error))
+				fetch(url)
+					.then(response => response.json())
+					.then(response => sendResponse({farewell: response}))
+					.catch(error => console.log(error))
 
-			return true;
+				return true;
+			}
+
+			return false
 
 		//if not image or pdf doc then checks the html for a table and hands url to 
 		//HTML extraction script 
