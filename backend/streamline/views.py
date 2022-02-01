@@ -75,6 +75,7 @@ def get_page_data_pdf(request):
     #store URL
     page = Url_table.objects.create(url=url)
     page_id = page.id
+    table_count = 0
 
     # Check if page input is valid
     if (re.search(regex, pages)):
@@ -89,20 +90,23 @@ def get_page_data_pdf(request):
         pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
         #convert its table(s) into csv(s) and get table count
         table_count = download_pdf.download_pdf_tables(pdf_path, page_id, save_path=CSV_PATH, pages=pages)
-        
-        #store each table from page
-        for i in range(table_count):
-            Tables.objects.create(Url_Id=page, Table_Id=(i + 1))
+    
+    else:
+         print("Invalid input")
 
-         #inforamtion to pass to the webpage
-        Web_Page_Url = Url_table.objects.filter(id = page_id)
-        Web_Page_Tables = Tables.objects.filter(Url_Id = page_id)
+    #store each table from page
+    for i in range(table_count):
+        Tables.objects.create(Url_Id=page, Table_Id=(i + 1))
 
-        context_dict = {}
-        context_dict["id"] = page_id
-        context_dict["Web_Page_Url"] = Web_Page_Url
-        context_dict["Web_Page_Tables"] = Web_Page_Tables
-        context_dict["table_count"] = table_count
+        #inforamtion to pass to the webpage
+    Web_Page_Url = Url_table.objects.filter(id = page_id)
+    Web_Page_Tables = Tables.objects.filter(Url_Id = page_id)
+
+    context_dict = {}
+    context_dict["id"] = page_id
+    context_dict["Web_Page_Url"] = Web_Page_Url
+    context_dict["Web_Page_Tables"] = Web_Page_Tables
+    context_dict["table_count"] = table_count
 
     return render(request, 'streamline/preview_page.html', context=context_dict)
 

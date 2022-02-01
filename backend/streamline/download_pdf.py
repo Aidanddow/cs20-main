@@ -41,7 +41,8 @@ def download_pdf_tables(pdf_path, page_id, save_path=None, pages="all"):
         
         #saves files with custom name
         for i in range(len(tables)):
-            tables[i].to_csv(f"saved/table{page_id}_{i}.csv")
+            table_id = i + 1
+            tables[i].to_csv(f"saved/table{page_id}_{table_id}.csv")
 
         
         print(f"--- {len(tables)} CSV files saved to {path}")
