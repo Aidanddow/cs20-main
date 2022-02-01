@@ -8,6 +8,7 @@ from pathlib import Path
 from django.http import JsonResponse , HttpResponse
 from . import extract, download_image, download_pdf
 from django.conf import settings
+import re 
 
 # Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
@@ -39,15 +40,22 @@ def get_page_data_pdf(request):
     print('topic-PDF:', url)
     print('pages-PDF:', pages)
 
-    # Gets name of pdf file currently being viewed, decodes it
-    pdf_name = os.path.basename(url)
-    pdf_name = urllib.parse.unquote(pdf_name)
+    regex = "^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$|^all$/g"
 
-    # downloads pdf from right click
-    pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
+    # Check if page input is valid
+    if (re.search(regex, pages)):
 
-    # convert its table(s) into csv(s)
-    download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH, pages=pages)
+        print("Valid input")
+
+        # Gets name of pdf file currently being viewed, decodes it
+        pdf_name = os.path.basename(url)
+        pdf_name = urllib.parse.unquote(pdf_name)
+
+        # downloads pdf from right click
+        pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
+
+        # convert its table(s) into csv(s)
+        download_pdf.download_pdf_tables(pdf_path, save_path=CSV_PATH, pages=pages)
 
     filePath = zip_or_csv(CSV_PATH)
     response = create_file_response(filePath)
