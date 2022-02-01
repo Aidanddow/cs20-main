@@ -21,7 +21,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 Takes a url, finds all html tables and processes them,
 saving their data to xls files.
 '''
-def extract(url, save_path=None):
+def extract(url, page_id=0, save_path=None):
     print(f"--- Reading {url}")
 
     try:
@@ -51,7 +51,7 @@ def extract(url, save_path=None):
             except:
                 title = None
             
-            write_to_csv(tableArray, formattedData, num, title=title, path=save_path)
+            write_to_csv(tableArray, formattedData, num, page_id, title=title, path=save_path)
         
         print("--- Finished Processing Tables!")
         driver.quit()
@@ -61,6 +61,11 @@ def extract(url, save_path=None):
             
     except Exception as error:
         print("--- Error:", error)
+    
+    
+    #give number of tables to views to create ids in database for each one 
+    number_of_tables = len(tableList)
+    return number_of_tables
 
         
 
@@ -113,7 +118,7 @@ def process_table(table):
 Takes a 2D array and writes the data to an xls file in the Desktop
 '''
 
-def write_to_csv(table, formattedData, num, title=None, path=None):
+def write_to_csv(table, formattedData, num, page_id, title=None, path=None):
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
     
@@ -142,7 +147,7 @@ def write_to_csv(table, formattedData, num, title=None, path=None):
 
     # Save the file to "path/{num}.xls"
     global doi
-    fname = f"table{num+1}_{doi}.xls"
+    fname = f"table{page_id}_{num+1}_{doi}.csv"
 
     path = os.path.join(path, fname)
     wbk.save(path)

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+
+<p>Hello World! Id = {{ id }} number of tables = {{ table_count }}</p>
+
+<div>
+    <ul>
+        {% for url in Web_Page_Url %}			
+                <li class="w3-bar">
+                   <p>ID - {{ url.id }} URL - {{ url.url }}
+                   <a href="{% url 'download_page'  url.id 0 %}">download all</a></p>
+                </li>						
+        {% endfor %}
+        </ul>
+</div>
+
+<div>
+    <ul>
+        {% for table in Web_Page_Tables %}			
+                <li class="w3-bar">
+                   <p>TABLE ID - {{ table.Table_Id }} URL ID - {{ table.Url_Id.id }}  
+                   <a href="{% url 'download_page'  id  table.Table_Id  %}">download</a></p>
+                </li>						
+        {% endfor %}
+        </ul>
+</div>
+
+
+<!-- specidy download file and do the same for all other file types -->

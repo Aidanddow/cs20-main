@@ -1,4 +1,5 @@
 var serverhost = 'http://127.0.0.1:8000';
+var download_page = serverhost + '/streamline/download_page/'
 
 //Creates context menu in right click menu and listener
 chrome.runtime.onInstalled.addListener( function( ) {
@@ -66,8 +67,11 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 		//HTML extraction script 
 		}else{
 			//Create URL and page url to give to get_page_data function 
-			
+			//var UrlId = serverhost + '/streamline/get_page_data_HTML/?topic='+ encodeURIComponent(info["pageUrl"]);
+
+
 			chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_HTML/?topic='+ encodeURIComponent(info["pageUrl"])});
+
 
 			fetch(url)
 			.then(response => response.json())

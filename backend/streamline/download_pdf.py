@@ -10,6 +10,8 @@ import os
 import urllib.request
 from pathlib import Path
 
+from cv2 import rectangle
+
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'}
 
 # Simple script to download a pdf from a link - wont be used in project, just used 
@@ -28,7 +30,7 @@ def download_pdf(url, fname="pdf.pdf", save_path=None):
     return path
 
 
-def download_pdf_tables(pdf_path, save_path=None, pages="all"):
+def download_pdf_tables(pdf_path, page_id, save_path=None, pages="all"):
     print("--- Checking for tables in page", pages) 
     tables = camelot.read_pdf(pdf_path, pages=pages, flavor="stream", edge_tol=100)
 
@@ -36,11 +38,18 @@ def download_pdf_tables(pdf_path, save_path=None, pages="all"):
         print(f"--- Saving {len(tables)} tables to CSV")
 
         path = os.path.join(save_path, "table.csv")   
-        tables.export(path, f='csv', compress=False)
+        
+        #saves files with custom name
+        for i in range(len(tables)):
+            tables[i].to_csv(f"saved/table{page_id}_{i}.csv")
+
         
         print(f"--- {len(tables)} CSV files saved to {path}")
     else:
         print("--- No tables found")
+
+    number_of_tables = len(tables)
+    return number_of_tables
 
 
 # Temporary main method to download pdf tables from terminal
