@@ -34,6 +34,9 @@ def extract(url, page_id=0, save_path=None):
 
         tableList = driver.find_elements(By.TAG_NAME, "table")
         
+        footnoteList = driver.find_elements(By.XPATH, "//div[contains(@class, 'footnote')]")
+        footnotes = process_footnote(footnoteList)
+        
         # Get doi from url (Not Working)
         global doi
         doi = extract_doi(url)
@@ -41,6 +44,10 @@ def extract(url, page_id=0, save_path=None):
         for num, table in enumerate(tableList):
             print(f"--- Processing Table {num+1}")
             tableArray, formattedData = process_table(table)
+            try:
+                footnoteData = footnotes[num]
+            except:
+                footnoteData = None
 
             # If a title exists for this table, pass it
             try:
@@ -51,7 +58,7 @@ def extract(url, page_id=0, save_path=None):
             except:
                 title = None
             
-            write_to_csv(tableArray, formattedData, num, page_id, title=title, path=save_path)
+            write_to_csv(tableArray, formattedData, footnoteData, num, page_id, title=title, path=save_path)
         
         print("--- Finished Processing Tables!")
         driver.quit()
@@ -67,7 +74,17 @@ def extract(url, page_id=0, save_path=None):
     number_of_tables = len(tableList)
     return number_of_tables
 
-        
+'''
+Takes footnotes for all tables and generates an list
+'''
+def process_footnote(footnotes):
+    footnoteList, alist = [], []
+    for footnote in footnotes:
+        for li in footnote.find_elements(By.TAG_NAME, "li"):
+            alist.append(li.text)
+        footnoteList.append(alist)
+        alist = []
+    return footnoteList         
 
 '''
 Takes a html table element and generates an array corresponding to the row and column data
@@ -118,14 +135,14 @@ def process_table(table):
 Takes a 2D array and writes the data to an xls file in the Desktop
 '''
 
-def write_to_csv(table, formattedData, num, page_id, title=None, path=None):
+def write_to_csv(table, formattedData, footnoteData, num, page_id, title=None, path=None):
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
-    
+    # Count the last row 
+    line = 0
     # font and style
     style = xlwt.XFStyle()
     font = xlwt.Font()
-    
     
     # Write title into excel
     if title:
@@ -144,6 +161,18 @@ def write_to_csv(table, formattedData, num, page_id, title=None, path=None):
                 sheet.write(row_index+1, col_index, data, style=style)
             else:
                 sheet.write(row_index+1, col_index, data)
+        line = row_index
+    
+    if footnoteData:
+        # Add "FootNote" title
+        line += 3
+        sheet.write(line, 0, "FootNote")
+        # Go to the next row
+        line += 1
+        # Write footnotes(surronding texts) into file
+        for footnote in footnoteData:
+            sheet.write(line, 0, footnote)
+            line += 1
 
     # Save the file to "path/{num}.xls"
     global doi
