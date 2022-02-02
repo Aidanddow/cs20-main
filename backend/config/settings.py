@@ -17,7 +17,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 CSV_DIR = os.path.join(BASE_DIR, 'saved')
 
-# CSV_DIR = os.path.join(BASE_DIR, "saved")
+# Cache timeout is 4 hours
+CACHE_TIMEOUT = 60*60*4
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 

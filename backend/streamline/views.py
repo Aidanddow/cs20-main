@@ -2,6 +2,7 @@ import re
 import pandas as pd
 
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 from streamline.models import Url_table, Tables
 from django.conf import settings
 
@@ -10,10 +11,10 @@ from .utils import html_to_csv, pdf_to_csv, generics
 # Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
 
-
 '''
  Extracts table data from HTML
 '''
+@cache_page(settings.CACHE_TIMEOUT)
 def get_page_data_HTML(request):
     
     #Get Url
@@ -32,6 +33,7 @@ def get_page_data_HTML(request):
 '''
 Extracts table data from PDF
 '''
+@cache_page(settings.CACHE_TIMEOUT)
 def get_page_data_pdf(request):
     url = request.GET.get('topic', None)
     pages = request.GET.get('pages', None)
@@ -64,9 +66,6 @@ def get_page_data_pdf(request):
 
 
 def download_page(request, url_id=0, table_id=0):
-    #pk1 is Url_table.id --- p2k is Tables.Table_Id
-    #if pk2 == 0 then download all
-
     file_path = generics.create_zip(CSV_PATH, url_id, table_id)
     return generics.create_file_response(file_path)
     
