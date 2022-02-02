@@ -18,8 +18,9 @@
     <ul>
         {% for table in Web_Page_Tables %}			
                 <li class="w3-bar">
-                   <p>TABLE ID - {{ table.Table_Id }} URL ID - {{ table.Url_Id.id }}  
-                   <a href="{% url 'download_page'  id  table.Table_Id  %}">download</a></p>
+                   <p>TABLE ID - {{ table.0.Table_Id }} URL ID - {{ table.0.Url_Id.id }}
+                   <a href="{% url 'download_page'  id  table.0.Table_Id  %}">download</a></p>
+                   {{table.1 | safe}}
                 </li>						
         {% endfor %}
         </ul>

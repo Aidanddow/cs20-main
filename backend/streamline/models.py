@@ -1,5 +1,3 @@
-from distutils.command.upload import upload
-from pyexpat import model
 from tkinter import CASCADE
 from django.db import models
 
@@ -13,4 +11,5 @@ class Tables(models.Model):
     
     Table_Id = models.IntegerField()
     Url_Id = models.ForeignKey(Url_table, on_delete=models.CASCADE)
+    csv_path = models.FilePathField(default=None)
     

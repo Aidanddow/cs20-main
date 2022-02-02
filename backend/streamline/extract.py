@@ -16,12 +16,13 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from streamline.models import Url_table, Tables
 
 '''
 Takes a url, finds all html tables and processes them,
 saving their data to xls files.
 '''
-def extract(url, page_id=0, save_path=None):
+def extract(url, web_page, save_path=None):
     print(f"--- Reading {url}")
 
     try:
@@ -58,7 +59,7 @@ def extract(url, page_id=0, save_path=None):
             except:
                 title = None
             
-            write_to_csv(tableArray, formattedData, footnoteData, num, page_id, title=title, path=save_path)
+            write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
         
         print("--- Finished Processing Tables!")
         driver.quit()
@@ -69,10 +70,8 @@ def extract(url, page_id=0, save_path=None):
     except Exception as error:
         print("--- Error:", error)
     
-    
     #give number of tables to views to create ids in database for each one 
-    number_of_tables = len(tableList)
-    return number_of_tables
+    return len(tableList)
 
 '''
 Takes footnotes for all tables and generates an list
@@ -84,7 +83,7 @@ def process_footnote(footnotes):
             alist.append(li.text)
         footnoteList.append(alist)
         alist = []
-    return footnoteList         
+    return footnoteList
 
 '''
 Takes a html table element and generates an array corresponding to the row and column data
@@ -135,7 +134,7 @@ def process_table(table):
 Takes a 2D array and writes the data to an xls file in the Desktop
 '''
 
-def write_to_csv(table, formattedData, footnoteData, num, page_id, title=None, path=None):
+def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, path=None):
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
     # Count the last row 
@@ -176,10 +175,14 @@ def write_to_csv(table, formattedData, footnoteData, num, page_id, title=None, p
 
     # Save the file to "path/{num}.xls"
     global doi
-    fname = f"table{page_id}_{num+1}_{doi}.csv"
+    fname = f"table{web_page.id}_{num+1}_{doi}.csv"
 
     path = os.path.join(path, fname)
     wbk.save(path)
+
+    # Creates a new table entry every time a new file is saved
+    Tables.objects.create(Url_Id=web_page, Table_Id=(num + 1), csv_path = path)
+
     print(f"--- Saved table {num+1} to {path}")
 
     

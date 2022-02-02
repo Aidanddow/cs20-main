@@ -1,4 +1,5 @@
 from asyncio import base_events
+import csv
 from difflib import context_diff
 import json
 import os
@@ -8,7 +9,7 @@ from zipfile import ZipFile
 from pathlib import Path
 from django.http import JsonResponse , HttpResponse, HttpResponseRedirect
 from django.template import context
-from markupsafe import re
+import re
 from . import extract, download_image, download_pdf
 from django.conf import settings
 
@@ -16,6 +17,8 @@ from django.shortcuts import render
 
 from streamline.models import Url_table, Tables
 from streamline.forms import *
+
+import pandas as pd
 
 import re 
 
@@ -38,25 +41,30 @@ def get_page_data_HTML(request):
     print('topic-HTML:', url)
 
     #store URL
-    page = Url_table.objects.create(url=url)
-    page_id = page.id
+    web_page = Url_table.objects.create(url=url)
     #process page
-    table_count = extract.extract(url, page_id, save_path=CSV_PATH, )
-    
-    #store each table from page
-    for i in range(table_count):
-        Tables.objects.create(Url_Id=page, Table_Id=(i + 1))
-
+    table_count = extract.extract(url, web_page, save_path=CSV_PATH)
     
     #inforamtion to pass to the webpage
-    Web_Page_Url = Url_table.objects.filter(id = page_id)
-    Web_Page_Tables = Tables.objects.filter(Url_Id = page_id)
+    Web_Page_Url = Url_table.objects.filter(id = web_page.id)
+    Web_Page_Tables = Tables.objects.filter(Url_Id = web_page.id)
 
     context_dict = {}
-    context_dict["id"] = page_id
+    context_dict["id"] = web_page.id
     context_dict["Web_Page_Url"] = Web_Page_Url
-    context_dict["Web_Page_Tables"] = Web_Page_Tables
     context_dict["table_count"] = table_count
+
+    tables_html = []
+
+    for table in Web_Page_Tables:
+        # Pandas cannot open the saved csv due to the following:
+        # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
+        # Hence, I am inserting dummy html code
+
+        # df_csv = pd.read_csv(table.csv_path, engine='python')
+        tables_html.append((table, "<p>Preview not available<p>"))
+
+    context_dict["Web_Page_Tables"] = tables_html
 
     return render(request, 'streamline/preview_page.html', context=context_dict)
 
@@ -70,43 +78,41 @@ def get_page_data_pdf(request):
     print('topic-PDF:', url)
     print('pages-PDF:', pages)
 
-    regex = "^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$|^all$/g"
-
     #store URL
-    page = Url_table.objects.create(url=url)
-    page_id = page.id
+    file = Url_table.objects.create(url=url)
     table_count = 0
+
+    regex = "^all$|^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$"
 
     # Check if page input is valid
     if (re.search(regex, pages)):
 
         print("Valid input")
 
-        # Gets name of pdf file currently being viewed, decodes it
-        pdf_name = os.path.basename(url)
-        pdf_name = urllib.parse.unquote(pdf_name)
-
         #downloads pdf from right click
-        pdf_path = download_pdf.download_pdf(url, fname=pdf_name, save_path=CSV_PATH)
+        pdf_path = download_pdf.download_pdf(url, save_path=CSV_PATH)
         #convert its table(s) into csv(s) and get table count
-        table_count = download_pdf.download_pdf_tables(pdf_path, page_id, save_path=CSV_PATH, pages=pages)
+        table_count = download_pdf.download_pdf_tables(pdf_path, file, save_path=CSV_PATH, pages=pages)
     
     else:
          print("Invalid input")
 
-    #store each table from page
-    for i in range(table_count):
-        Tables.objects.create(Url_Id=page, Table_Id=(i + 1))
-
-        #inforamtion to pass to the webpage
-    Web_Page_Url = Url_table.objects.filter(id = page_id)
-    Web_Page_Tables = Tables.objects.filter(Url_Id = page_id)
+    #inforamtion to pass to the webpage
+    Web_Page_Url = Url_table.objects.filter(id = file.id)
+    Web_Page_Tables = Tables.objects.filter(Url_Id = file.id)
 
     context_dict = {}
-    context_dict["id"] = page_id
+    context_dict["id"] = file.id
     context_dict["Web_Page_Url"] = Web_Page_Url
-    context_dict["Web_Page_Tables"] = Web_Page_Tables
     context_dict["table_count"] = table_count
+    
+    tables_html = []
+
+    for table in Web_Page_Tables:
+        df_csv = pd.read_csv(table.csv_path)
+        tables_html.append((table, df_csv.to_html()))
+
+    context_dict["Web_Page_Tables"] = tables_html
 
     return render(request, 'streamline/preview_page.html', context=context_dict)
 
@@ -125,87 +131,50 @@ def get_page_data_image(request):
     return JsonResponse(data)
 
 
-
 def preview_page(request, pk=1): 
     context = {"id" : pk}
     return render(request, 'streamline/preview_page.html', context=context)
+
 
 def download_page(request, pk1=0, pk2=0):
     #pk1 is Url_table.id --- p2k is Tables.Table_Id
     #if pk2 == 0 then download all
 
-    if pk2 == 0:
-        #download all
-        #filepath = location of created zip file
-        filePath = zip_or_csv(folder=CSV_PATH, url_id=pk1, table_id=0)
-        response = create_file_response(filePath)
-        return response
-    else:
-        #download table pk2 
-        filePath = zip_or_csv(folder=CSV_PATH, url_id=pk1, table_id=pk2)
-        response = create_file_response(filePath)
-        return response
-    
+    #download table pk2 
+    filePath = create_zip(CSV_PATH, pk1, pk2)
+    response = create_file_response(filePath)
     return response
-
-
-def zip_or_csv(folder, url_id=0, table_id=0):
-    '''
-    zip_or_csv() returns a filepath which can be one of two cases
-        1. There is only one csv file in folder -> Return the path of the file
-        2. There are multiple csv files in folder -> Create a zip archive of files and return that
-    '''
-
-    csv_files = [file for file in os.listdir(folder) if file.startswith("table" + str(url_id))]
-    if len(csv_files) == 0:
-        #there are no tables
-        pass
-    
-    if table_id == 0:
-        #download all
-        return create_zip(CSV_PATH, url_id)
-
-    else:
-        #download only table with id table_id
-         return create_zip(CSV_PATH, url_id, table_id)
-    
-
-    # if len(csv_files) == 1:
-    #     return os.path.join(CSV_PATH, csv_files[0])
-    # else:
 
 
 def create_zip(folder, url_id=0, table_id=0):
     '''
     Will create and return the path to a zip file of all csv files in folder
     '''
-
+    try:
+        os.chdir(folder)
+    except:
+        pass
+    
     if table_id == 0:
         #download all
-        os.chdir(folder)
-        zipPath = f"tables{url_id}.zip"   
+        zipPath = f"tables{url_id}.zip"  
 
-        with ZipFile(zipPath, 'w') as zipFile:
-            # Add multiple files to the zip
-            csv_files = [file for file in os.listdir(folder) if (file.startswith("table" + str(url_id)) and file.endswith(".csv"))]
-            
-            for file in csv_files:
-                zipFile.write(file)
-
+        # query all tables of the given file_id
+        tables = Tables.objects.filter(Url_Id = url_id)
     else:
-        #download only table with id table_id
-        os.chdir(folder)
+        # download only table with id table_id
         zipPath = f"table{url_id}_{table_id}.zip"
 
-        with ZipFile(zipPath, 'w') as zipFile:
-            # Add multiple files to the zip
-            csv_files = [file for file in os.listdir(folder) if (file.startswith("table" + str(url_id) + "_" + str(table_id)) and file.endswith(".csv"))]
-            
-            for file in csv_files:
-                zipFile.write(file)
+        # query the table with table_id
+        tables = Tables.objects.filter(Url_Id = url_id, Table_Id=table_id)
+
+    #download only table with id table_id
+    with ZipFile(zipPath, 'w') as zipFile:
+        # Add multiple files to the zip
+        for table in tables:
+            zipFile.write(os.path.basename(table.csv_path))
 
     return os.path.abspath(zipPath)
-        
 
 
 def create_file_response(file_path):
