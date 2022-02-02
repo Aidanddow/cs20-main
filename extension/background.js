@@ -31,23 +31,8 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 		//checks if the DOM element is a image, if so them gets the src of the image and passes 
 		//it to the views 
 		if (info.mediaType == "image"){
-			//check if source for image exists
-			if (info.srcUrl){
-				//creates url with the src of image in it to be collected by the webapp 
-				console.log("Image")
-				var url = serverhost + '/streamline/get_page_data_image/?topic='+ encodeURIComponent(info["srcUrl"]);
+			alert("Image files are not supported")
 
-				chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_image/?topic='+ encodeURIComponent(info["srcUrl"])});
-				//console.log("WORKING");
-
-				fetch(url)
-				.then(response => response.json())
-				.then(response => sendResponse({farewell: response}))
-				.catch(error => console.log(error))
-					
-				
-				return true;
-			}
 		//no way to get dom info from pdf, so checks the url - not checks for imbeded pdfs 
 		//dosent check what type of pdf
 		}else if (url.includes(".pdf")) {
@@ -83,9 +68,7 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 			//Create URL and page url to give to get_page_data function 
 			//var UrlId = serverhost + '/streamline/get_page_data_HTML/?topic='+ encodeURIComponent(info["pageUrl"]);
 
-
 			chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_HTML/?topic='+ encodeURIComponent(info["pageUrl"])});
-
 
 			fetch(url)
 			.then(response => response.json())

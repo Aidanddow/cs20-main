@@ -8,7 +8,7 @@ import camelot
 import sys
 import os
 import urllib.request
-from streamline.models import Url_table, Tables
+from streamline.models import Tables
 
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'}
 

@@ -5,8 +5,6 @@ class Url_table(models.Model):
     id = models.BigAutoField(primary_key=True)
     url = models.CharField(max_length=200)
 
-
-
 class Tables(models.Model):
     
     Table_Id = models.IntegerField()
