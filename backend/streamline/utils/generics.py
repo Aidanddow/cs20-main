@@ -3,59 +3,65 @@ import pandas as pd
 import mimetypes
 from zipfile import ZipFile
 from django.http import HttpResponse
-from streamline.models import Url_table, Tables
 
-def create_context(file, table_count):
+from streamline.models import Table_PDF, Table_HTML
+
+def create_context(url_obj, tables_obj, table_type="pdf"):
     #inforamtion to pass to the webpage
-    Web_Page_Url = Url_table.objects.filter(id = file.id)
-    Web_Page_Tables = Tables.objects.filter(Url_Id = file.id)
 
     context_dict = {}
-    context_dict["id"] = file.id
-    context_dict["Web_Page_Url"] = Web_Page_Url
-    context_dict["table_count"] = table_count
+    context_dict["Web_Page_Url"] = url_obj
+    context_dict["table_count"] = len(tables_obj)
+    context_dict["table_type"] = table_type
     
     tables_html = []
+    table_ids = ""
 
-    for table in Web_Page_Tables:
+    for table in tables_obj:
+        table_id = str(table.id)
+        table_ids = table_ids + "," + table_id
         try:
-            df_csv = pd.read_csv(table.csv_path)
+            df_csv = pd.read_csv(table.file_path)
             csv_html = df_csv.to_html()
         except:
             # Pandas cannot open the saved HTML to CSV due to the following:
             # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
             csv_html = "<p>Preview not available</p>"
 
-        tables_html.append((table, csv_html))
+        tables_html.append((table_id, csv_html))
+
+    if(table_ids!=""):
+        table_ids = table_ids[1:]
 
     context_dict["Web_Page_Tables"] = tables_html
+    context_dict["table_ids"] = table_ids
 
     return context_dict
 
 '''
 Will create and return the path to a zip file of all csv files in folder
 '''
-def create_zip(folder, url_id=0, table_id=0):
+def create_zip(folder, table_ids="", table_type="pdf"):
     try:
         os.chdir(folder)
     except:
         pass
 
-    if table_id == 0:
-        #download all
-        zipPath = f"tables{url_id}.zip"  
-        # query all tables of the given file_id
-        tables = Tables.objects.filter(Url_Id = url_id)
-    else:
-        # download only table with id table_id
-        zipPath = f"table{url_id}_{table_id}.zip"
-        # query the table with table_id
-        tables = Tables.objects.filter(Url_Id = url_id, Table_Id=table_id)
+    zipPath = f"tables.zip" 
 
+    table_paths = []
+
+    if(table_type=="pdf"):
+        for table_id in table_ids.split(","):
+            table_paths.append(Table_PDF.objects.filter(id = int(table_id)).first().file_path)
+    else:
+        for table_id in table_ids.split(","):
+            table_paths.append(Table_HTML.objects.filter(id = int(table_id)).first().file_path)
+        
     # Create zip file
     with ZipFile(zipPath, 'w') as zipFile:
-        for table in tables:
-            zipFile.write(os.path.basename(table.csv_path))
+        for path in table_paths:
+            zipFile.write(os.path.basename(path))
     
     return os.path.abspath(zipPath)
 

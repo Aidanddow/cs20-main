@@ -16,7 +16,9 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from streamline.models import Url_table, Tables
+
+from streamline.models import Table_HTML
+
 
 '''
 Takes a url, finds all html tables and processes them,
@@ -181,7 +183,7 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     wbk.save(path)
 
     # Creates a new table entry every time a new file is saved
-    Tables.objects.create(Url_Id=web_page, Table_Id=(num + 1), csv_path = path)
+    Table_HTML.objects.create(html_id=web_page, file_path = path)
 
     print(f"--- Saved table {num+1} to {path}")
 
