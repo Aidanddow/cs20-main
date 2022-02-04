@@ -56,6 +56,7 @@ def get_tables_from_pdf(request):
     print('options', options)
     #options - contains string of 01s to indicate true/falses 
     options_list = generics.get_options(options)
+    
     regex = "^all$|^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$"
 
     tables_obj = []
