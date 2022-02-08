@@ -1,4 +1,4 @@
-
+// Option1 = Enable Preview
 check1 = document.getElementById("option1");
 check2 = document.getElementById("option2");
 
@@ -11,11 +11,26 @@ console.log(check1);
 console.log(check2);
 
 function SaveOption1 (){
-	chrome.storage.local.set({"Option1" : check1.checked}, function(){});
+	if (check1.checked){
+		chrome.storage.local.set({"Option1" : '1'}, function(){});
+		console.log(0)
+	}
+	else {
+		chrome.storage.local.set({"Option1" : '0'}, function(){});
+		console.log(1)
+	}
 }
 
 function SaveOption2 (){
-	chrome.storage.local.set({ "Option2" : check2.checked}, function(){}); 
+
+	if (check1.checked){
+		chrome.storage.local.set({"Option2" : '1'}, function(){});
+		console.log(0)
+	}
+	else {
+		chrome.storage.local.set({"Option2" : '0'}, function(){});
+		console.log(1)	
+	}
 }
 
 

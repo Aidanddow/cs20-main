@@ -6,3 +6,4 @@ chrome.extension.onMessage.addListener(function (message, sender, response) {
 })
 
 console.log("message");
+
