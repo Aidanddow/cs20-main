@@ -5,7 +5,7 @@ from zipfile import ZipFile
 from django.http import HttpResponse
 from streamline.models import Url_table, Tables
 
-def create_context(file, table_count):
+def create_context(file, table_count, options):
     #inforamtion to pass to the webpage
     Web_Page_Url = Url_table.objects.filter(id = file.id)
     Web_Page_Tables = Tables.objects.filter(Url_Id = file.id)
@@ -17,16 +17,18 @@ def create_context(file, table_count):
     
     tables_html = []
 
-    for table in Web_Page_Tables:
-        try:
-            df_csv = pd.read_csv(table.csv_path)
-            csv_html = df_csv.to_html()
-        except:
-            # Pandas cannot open the saved HTML to CSV due to the following:
-            # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
-            csv_html = "<p>Preview not available</p>"
+    #if preview is enabled
+    if options[0]:
+        for table in Web_Page_Tables:
+            try:
+                df_csv = pd.read_csv(table.csv_path)
+                csv_html = df_csv.to_html()
+            except:
+                # Pandas cannot open the saved HTML to CSV due to the following:
+                # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
+                csv_html = "<p>Preview not available</p>"
 
-        tables_html.append((table, csv_html))
+            tables_html.append((table, csv_html))
 
     context_dict["Web_Page_Tables"] = tables_html
 

@@ -24,12 +24,20 @@ def get_page_data_HTML(request):
     print('topic-HTML:', url)
     print('options', options)
 
+    #Set up options list 
+    options_list = []
+    for char in options:
+        if char.isdigit():
+            options_list.append(int(char))
+        else:
+            options_list.append(1)
+
     #store URL
     web_page = Url_table.objects.create(url=url)
     #process page
     table_count = html_to_csv.extract(url, web_page, save_path=CSV_PATH)
     
-    context_dict = generics.create_context(web_page, table_count)
+    context_dict = generics.create_context(web_page, table_count, options_list)
 
     return render(request, 'streamline/preview_page.html', context=context_dict)
 
@@ -68,7 +76,15 @@ def get_page_data_pdf(request):
     else:
          print("Invalid input")
 
-    context_dict = generics.create_context(file, table_count)
+    #Set up options list 
+    options_list = []
+    for char in options:
+        if char.isdigit():
+            options_list.append(int(char))
+        else:
+            options_list.append(1)         
+
+    context_dict = generics.create_context(file, table_count, options_list)
 
     return render(request, 'streamline/preview_page.html', context=context_dict)
 
