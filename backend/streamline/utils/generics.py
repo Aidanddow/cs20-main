@@ -10,7 +10,7 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
     #inforamtion to pass to the webpage
 
     context_dict = {}
-    context_dict["Web_Page_Url"] = url_obj
+    context_dict["url_id"] = url_obj.id
     context_dict["table_count"] = len(tables_obj)
     context_dict["table_type"] = table_type
     
@@ -21,13 +21,16 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
         table_id = str(table.id)
         table_ids = table_ids + "," + table_id
         try:
-            df_csv = pd.read_csv(table.file_path)
+            df_csv = pd.read_csv(table.file_path, index_col=False)
+            df_csv.fillna('', inplace=True)
+            df_csv.set_index(df_csv.columns[0], inplace=True)
+            # df_csv.reset_index(drop=True, inplace=True)
             csv_html = df_csv.to_html()
         except:
             # Pandas cannot open the saved HTML to CSV due to the following:
             # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
             csv_html = "<p>Preview not available</p>"
-
+        
         tables_html.append((table_id, csv_html))
 
     if(table_ids!=""):
