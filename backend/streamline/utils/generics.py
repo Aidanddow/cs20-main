@@ -3,72 +3,76 @@ import pandas as pd
 import mimetypes
 from zipfile import ZipFile
 from django.http import HttpResponse
-from streamline.models import Url_table, Tables
 
-def get_options(options):
-    """
-    Receives a string of 1's and 0's corresponding to different user settings
-    """
-    return [int(char) if char.isdigit() else 1 for char in options]
+from streamline.models import Table_PDF, Table_HTML
 
+def create_context(url_obj, tables_obj, table_type="pdf"):
+    #inforamtion to pass to the webpage
 
-def get_html_representations(tables):
-    """
-    Returns a list containing html representations of the csv tables
-    """
+    context_dict = {}
+    context_dict["url_id"] = url_obj.id
+    context_dict["table_count"] = len(tables_obj)
+    context_dict["table_type"] = table_type
+    
     tables_html = []
+    table_ids = ""
 
-    for table in tables:
+    for table in tables_obj:
+        table_id = str(table.id)
+        table_ids = table_ids + "," + table_id
         try:
-            df_csv = pd.read_csv(table.csv_path)
+            df_csv = pd.read_csv(table.file_path, index_col=False)
+            df_csv.fillna('', inplace=True)
+            df_csv.set_index(df_csv.columns[0], inplace=True)
+            # df_csv.reset_index(drop=True, inplace=True)
             csv_html = df_csv.to_html()
-                
-        except UnicodeDecodeError:
+        except:
+            # Pandas cannot open the saved HTML to CSV due to the following:
+            # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
             csv_html = "<p>Preview not available</p>"
         
-        tables_html.append((table, csv_html))
-    return tables_html
+        tables_html.append((table_id, csv_html))
 
+    if(table_ids!=""):
+        table_ids = table_ids[1:]
 
-def create_context(file, table_count, options):
-    """
-    Returns a dictionary to provide context to the extension
-    """
-    #inforamtion to pass to the webpage
-    webpage_tables = Tables.objects.filter(Url_Id = file.id)
+    context_dict["Web_Page_Tables"] = tables_html
+    context_dict["table_ids"] = table_ids
 
-    #if preview is enabled
-    if options[0]:
-        tables_html = get_html_representations(webpage_tables)
+    return context_dict
 
-    return { "id": file.id,
-             "table_count": table_count,
-             "Web_Page_Url": Url_table.objects.filter(id = file.id),
-             "Web_Page_Tables": tables_html }
+'''
+Will create and return the path to a zip file of all csv files in folder
+'''
+def create_zip(folder, table_ids="", table_type="pdf"):
+    try:
+        os.chdir(folder)
+    except:
+        pass
 
+    zipPath = f"tables.zip" 
 
-def create_zip(folder, url_id=0, table_id=0):
-    '''
-    Will create and return the path to a zip file of all csv files in folder
-    '''
-    os.chdir(folder)
+    table_paths = []
 
-    # Query all tables of the given file_id
-    tables = Tables.objects.filter(Url_Id = url_id)
-
-    zipPath = f"tables{url_id}.zip"  
-
+    if(table_type=="pdf"):
+        for table_id in table_ids.split(","):
+            table_paths.append(Table_PDF.objects.filter(id = int(table_id)).first().file_path)
+    else:
+        for table_id in table_ids.split(","):
+            table_paths.append(Table_HTML.objects.filter(id = int(table_id)).first().file_path)
+        
+    # Create zip file
     with ZipFile(zipPath, 'w') as zipFile:
-        for table in tables:
-            zipFile.write(os.path.basename(table.csv_path))
+        for path in table_paths:
+            zipFile.write(os.path.basename(path))
     
     return os.path.abspath(zipPath)
 
 
+'''
+Creates a HttpResponse with a file attatched, and returns the response
+'''
 def create_file_response(file_path):
-    '''
-    Creates a HttpResponse with a file attatched, and returns the response
-    '''
     print(f"--- Sending file {file_path} as HttpResponse")
 
     # guess_type() returns a tuple (type, encoding) we disregard the encoding
@@ -78,5 +82,9 @@ def create_file_response(file_path):
     with open(file_path, 'rb') as file:
         response = HttpResponse(file, content_type=mime_type)
         response['Content-Disposition'] = f'attachment; filename={fname}'
-        return response
+    
+    # Remove created zip file from server
+    os.remove(file_path)
+
+    return response
 

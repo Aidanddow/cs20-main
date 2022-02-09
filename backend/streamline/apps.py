@@ -1,5 +1,10 @@
 from django.apps import AppConfig
+from django.utils.module_loading import autodiscover_modules
 
 class StreamlineConfig(AppConfig):
     name = 'streamline'
-    default_auto_field='django.db.models.AutoField' 
+
+    def ready(self):
+        autodiscover_modules('signals')
+
+default_app_config = 'streamline.apps.StreamlineConfig'

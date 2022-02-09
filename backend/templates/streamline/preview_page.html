@@ -1,30 +1,42 @@
+{% load static %}
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Extracted Tables</title>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 
-<p>Hello World! Id = {{ id }} number of tables = {{ table_count }}</p>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+        <div>
+                <nav class="navbar navbar-light justify-content-between bg-light">
+                        <span class="navbar-brand mx-4 mb-0 h1">Found {{ table_count }} tables in URL {{url_id}}</span>
+                        <ul class="navbar-nav">
+                                <li class="nav-item">
+                                        <a class="btn btn-outline-primary mx-4 mt-2" href="{% url 'download_page' table_ids table_type %}">Download All</a></p>
+                                </li>
+                        </ul>
+                </nav>
+        
+                <ul class="list-group list-group-flush">
+                        {% for table in Web_Page_Tables %}
+                                <li class="list-group-item p-4">
+                                        <div class="d-flex flex-row align-items-center justify-content-center">
+                                                <h4 class="mb-0">TABLE ID {{ table.0 }}</h4>
+                                                <a class="btn btn-outline-primary mb-0 mx-4" href="{% url 'download_page'  table.0 table_type %}">Download</a>
+                                        </div>
+                                        
+                                        {{table.1 | safe}}
+                                </li>			
+                        {% endfor %}
+                </ul>
+        </div>
 
-<div>
-    <ul>
-        {% for url in Web_Page_Url %}			
-                <li class="w3-bar">
-                   <p>ID - {{ url.id }} URL - {{ url.url }}
-                   <a href="{% url 'download_file'  url.id 0 %}">download all</a></p>
-                </li>						
-        {% endfor %}
-        </ul>
-</div>
+</body>
+</html>
 
-<div>
-    <ul>
-        {% for table in Web_Page_Tables %}			
-                <li class="w3-bar">
-                   <p>TABLE ID - {{ table.0.Table_Id }} URL ID - {{ table.0.Url_Id.id }}
-                   <a href="{% url 'download_file'  id  table.0.Table_Id  %}">download</a></p>
-                   {{table.1 | safe}}
-                </li>						
-        {% endfor %}
-        </ul>
-</div>
-
-
-<!-- specidy download file and do the same for all other file types -->
