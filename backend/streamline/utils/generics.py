@@ -44,16 +44,9 @@ def create_zip(folder, url_id=0, table_id=0):
     except:
         pass
 
-    if table_id == 0:
-        #download all
-        zipPath = f"tables{url_id}.zip"  
-        # query all tables of the given file_id
-        tables = Tables.objects.filter(Url_Id = url_id)
-    else:
-        # download only table with id table_id
-        zipPath = f"table{url_id}_{table_id}.zip"
-        # query the table with table_id
-        tables = Tables.objects.filter(Url_Id = url_id, Table_Id=table_id)
+    zipPath = f"tables{url_id}.zip"  
+    # query all tables of the given file_id
+    tables = Tables.objects.filter(Url_Id = url_id)
 
     # Create zip file
     with ZipFile(zipPath, 'w') as zipFile:
