@@ -25,12 +25,7 @@ def get_page_data_HTML(request):
     print('options', options)
 
     #Set up options list 
-    options_list = []
-    for char in options:
-        if char.isdigit():
-            options_list.append(int(char))
-        else:
-            options_list.append(1)
+    options_list = [int(char) if char.isdigit() else 1 for char in options]
 
     #store URL
     web_page = Url_table.objects.create(url=url)
@@ -90,7 +85,13 @@ def get_page_data_pdf(request):
 
 
 def download_page(request, url_id=0, table_id=0):
-    file_path = generics.create_zip(CSV_PATH, url_id, table_id)
+    
+    if table_id ==0:
+        file_path = generics.create_zip(CSV_PATH, url_id, table_id)
+    else:  
+        table = Tables.objects.filter(Url_Id = url_id, Table_Id=table_id)
+        file_path = table.get().csv_path
+
     return generics.create_file_response(file_path)
     
     
