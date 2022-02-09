@@ -12,12 +12,6 @@ def get_options(options):
     """
     return [int(char) if char.isdigit() else 1 for char in options]
 
-
-def get_html_representations(tables):
-    """
-    Returns a list containing html representations of the csv tables
-    """
-
 def create_context(url_obj, tables_obj, table_type="pdf"):
     #inforamtion to pass to the webpage
 
