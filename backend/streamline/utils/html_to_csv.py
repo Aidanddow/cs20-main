@@ -1,21 +1,17 @@
 '''
-Need to install selenium and webdriver-manager in advance
-% pip install selenium
-% pip install webdriver_manager
+Need to install bs4 and lxml in advance
+% pip install bs4
+% pip install lxml
 
 To run by itself,
 % python extract.py <url>
 '''
 
 import sys, os
-import time
 import xlwt
 from pathlib import Path
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from bs4 import BeautifulSoup
+import requests
 from streamline.models import Url_table, Tables
 
 '''
@@ -26,19 +22,20 @@ def extract(url, web_page, save_path=None):
     print(f"--- Reading {url}")
 
     try:
-        driver = initialize_driver()
-        driver.get(url)
-
+        header = {'User-Agent': 'Mozilla/5.0'}
+        session = requests.session()
+        html = session.get(url, headers=header)
+        soup = BeautifulSoup(html.text,'lxml')
+        
         # Get titles of tables
-        titles = driver.find_elements(By.TAG_NAME, "header")
-        titleList = [title.text for title in titles]
+        titleList = [title.text for title in soup.select('header[class*="table"]')]
 
-        tableList = driver.find_elements(By.TAG_NAME, "table")
+        tableList = soup.find_all('table')
         
-        footnoteList = driver.find_elements(By.XPATH, "//div[contains(@class, 'footnote')]")
-        footnotes = process_footnote(footnoteList)
+        footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
+        footnoteList = process_footnote(footnotes)
         
-        # Get doi from url (Not Working)
+        # Get doi from url
         global doi
         doi = extract_doi(url)
         
@@ -46,14 +43,14 @@ def extract(url, web_page, save_path=None):
             print(f"--- Processing Table {num+1}")
             tableArray, formattedData = process_table(table)
             try:
-                footnoteData = footnotes[num]
+                footnoteData = footnoteList[num]
             except:
                 footnoteData = None
 
             # If a title exists for this table, pass it
             try:
-                if len(titleList) > num and "Table" in titleList[num+1]:
-                    title = titleList[num+1]
+                if len(titleList) > num and "Table" in titleList[num]:
+                    title = titleList[num]
                 else:
                     title = None
             except:
@@ -62,16 +59,16 @@ def extract(url, web_page, save_path=None):
             write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
         
         print("--- Finished Processing Tables!")
-        driver.quit()
-
+    
     except FileNotFoundError:
         print(f"--- No folder \"{save_path}\" found")
             
     except Exception as error:
         print("--- Error:", error)
     
-    #give number of tables to views to create ids in database for each one 
+    #give number of tables to views to create ids in database for each one
     return len(tableList)
+    
 
 '''
 Takes footnotes for all tables and generates an list
@@ -79,7 +76,7 @@ Takes footnotes for all tables and generates an list
 def process_footnote(footnotes):
     footnoteList, alist = [], []
     for footnote in footnotes:
-        for li in footnote.find_elements(By.TAG_NAME, "li"):
+        for li in footnote.find_all('li'):
             alist.append(li.text)
         footnoteList.append(alist)
         alist = []
@@ -93,29 +90,40 @@ def process_table(table):
     formattedDataList = []
 
     try: 
-        theadNodes = table.find_elements(By.TAG_NAME, "th")
-        theadList = [th.text for th in theadNodes]
+        theadList = [th.text for th in table.find_all('th')]
         dataList.append(theadList)
 
     # No table header information
-    except NoSuchElementException:
+    except:
         pass
     
-    tbodyNodes = table.find_element(By.TAG_NAME, "tbody").find_elements(By.TAG_NAME, "tr")
+    tbodyNodes = table.find_all('tbody')
     
     # Get data from table
-    for tr in tbodyNodes:
-        tds = tr.find_elements(By.TAG_NAME, "td")
-
-        # Get the text for each cell, replacing empty strings with a dash
-        dataTr = [t.text if t.text != "" else "-" for t in tds]
-        dataList.append(dataTr)
+    for tbody in tbodyNodes:
+        for tr in tbody.find_all('tr'):
+            tds = []
+            for td in tr.find_all('td'):
+                # Remove link tag
+                link = td.find('a')
+                if link:
+                    link.extract()
+                sup = td.find('sup')
+                if sup:
+                    sup.extract()
+                # Get the text for each cell, replacing empty strings with a dash
+                if td.text != "":
+                    data = td.text.replace("\n", "")
+                else:
+                    data = "-"
+                tds.append(data)
+            dataList.append(tds)
     
     # Get data in bold and italics format
     try: 
-        boldNodes1 = table.find_elements(By.TAG_NAME, "strong")
-        boldNodes2 = table.find_elements(By.TAG_NAME, "b")
-        italicsNode = table.find_elements(By.TAG_NAME, "i")
+        boldNodes1 = table.find_all('strong')
+        boldNodes2 = table.find_all('b')
+        italicsNode = table.find_all('i')
         boldList = [bold.text for bold in boldNodes1]
         for bold in boldNodes2:
             boldList.append(bold.text)
@@ -124,7 +132,7 @@ def process_table(table):
         formattedDataList.append(boldList)
         formattedDataList.append(italicsList)
         
-    except NoSuchElementException:
+    except:
         pass
 
     return dataList, formattedDataList
@@ -133,7 +141,6 @@ def process_table(table):
 '''
 Takes a 2D array and writes the data to an xls file in the Desktop
 '''
-
 def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, path=None):
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
@@ -185,30 +192,6 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
 
     print(f"--- Saved table {num+1} to {path}")
 
-    
-'''
- Initializes and returns the web driver
-'''
-def initialize_driver(headless=True):
-    # Initialize the webdriver, headless hides popup window
-    options = webdriver.ChromeOptions()
-    options.headless = headless
-
-    # Create a new instance of selenium
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-   
-    # Runs the code on the driver
-    driver.execute_cdp_cmd(
-        "Page.addScriptToEvaluateOnNewDocument", {
-        "source":
-                """
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined
-                })
-                """
-        })
-    return driver
 
 '''
 Should extract the doi from a url
@@ -225,16 +208,16 @@ def extract_doi(url):
         doi = ""
 
     return doi
-    
 
 
 if __name__ == '__main__':
     try:
         url = sys.argv[1]
+        #url = "https://dom-pubs.onlinelibrary.wiley.com/doi/10.1111/dom.12903"
         doi = extract_doi(url)
 
         CSV_PATH = os.path.join(Path.home(), "Desktop")
-        extract(url, save_path=CSV_PATH)
+        extract(url, web_page=0, save_path=CSV_PATH)
 
     except Exception as e:
         print('--- Error', e)
