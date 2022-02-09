@@ -79,13 +79,16 @@ def create_file_response(file_path):
     with open(file_path, 'rb') as file:
         response = HttpResponse(file, content_type=mime_type)
         response['Content-Disposition'] = f'attachment; filename={fname}'
-        return response
+    
+    # Remove created zip file from server
+    os.remove(file_path)
+
+    return response
 
 '''
 Deletes all files in folder
 '''
 def clear_folder(folder):
-    
     os.chdir(folder)
     for file in os.listdir(folder):
         os.remove(file)

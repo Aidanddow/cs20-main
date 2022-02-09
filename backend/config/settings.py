@@ -18,8 +18,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV_DIR = os.path.join(BASE_DIR, os.path.join('saved', 'csv'))
 PDF_DIR = os.path.join(BASE_DIR, os.path.join('saved', 'pdf'))
 
-# Cache timeout is 4 hours
-CACHE_TIMEOUT = 60*60*4
+MAX_ENTRIES = 50
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
@@ -45,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'streamline'
+    'streamline.apps.StreamlineConfig',
 ]
 
 MIDDLEWARE = [
