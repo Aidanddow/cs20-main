@@ -1,17 +1,15 @@
 import re
-import pandas as pd
 
 from django.shortcuts import render
-from django.views.decorators.cache import cache_page
-from streamline.models import Url_table, Tables
+from streamline.models import Url_PDF, Url_HTML, Table_PDF, Table_HTML
 from django.conf import settings
 
 from .utils import html_to_csv, pdf_to_csv, generics
 
 # Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
+PDF_PATH = settings.PDF_DIR
 
-@cache_page(settings.CACHE_TIMEOUT)
 def get_tables_from_html(request):
     '''
     Extracts table data from HTML
@@ -26,18 +24,25 @@ def get_tables_from_html(request):
     # Set up options list 
     options_list = generics.get_options(options)
 
-    # Store URL
-    web_page = Url_table.objects.create(url=url)
+    html_obj = Url_PDF.objects.filter(url=url).first()
+        
+    if not html_obj:
+        #store URL
+        html_obj = Url_HTML.objects.create(url=url)
+        #process page
+        html_to_csv.extract(url, html_obj, save_path=CSV_PATH)
     
-    # Process page
-    table_count = html_to_csv.extract(url, web_page, save_path=CSV_PATH)
+    # Query extracted tables
+    tables_obj = Table_HTML.objects.filter(html_id=html_obj.id)
     
-    context_dict = generics.create_context(web_page, table_count, options_list)
+    if tables_obj:
+        context_dict = generics.create_context(html_obj, tables_obj,table_type="html")
 
-    return render(request, 'streamline/preview_page.html', context=context_dict)
+        return render(request, 'streamline/preview_page.html', context=context_dict)
+    else:
+        return render(request, 'streamline/no_tables.html', context={})
 
 
-@cache_page(settings.CACHE_TIMEOUT)
 def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
@@ -50,40 +55,63 @@ def get_tables_from_pdf(request):
     print('pages-PDF:', pages)
     print('options', options)
     #options - contains string of 01s to indicate true/falses 
-
-    #store URL
-    file = Url_table.objects.create(url=url)
-    table_count = 0
-
+    options_list = generics.get_options(options)
     regex = "^all$|^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$"
+
+    tables_obj = []
 
     # Check if page input is valid
     if (re.search(regex, pages)):
 
-        #downloads pdf from right click
-        pdf_path = pdf_to_csv.download_pdf(url, save_path=CSV_PATH)
-        #convert its table(s) into csv(s) and get table count
-        table_count = pdf_to_csv.download_pdf_tables(pdf_path, file, save_path=CSV_PATH, pages=pages)
+        print("Valid input")
 
+        pdf_obj = Url_PDF.objects.filter(url=url).first()
+        
+        page_list = pdf_to_csv.pages_to_int(pages)
+
+        if pdf_obj:
+            print("PDF Found")
+
+            pdf_path = pdf_obj.pdf_path
+
+            pages,tables_obj = pdf_to_csv.get_missing_pages(page_list, pdf_obj.id, tables_obj)
+
+            print("Pages to request",pages)
+
+        else:
+            print("New PDF", url)
+            # downloads pdf from right click
+            pdf_path = pdf_to_csv.download_pdf(url, save_path=PDF_PATH)
+            # store URL
+            pdf_obj = Url_PDF.objects.create(url=url, pdf_path=pdf_path)
+
+        #convert its table(s) into csv(s) and get table count
+        if(pages!=""):
+            new_tables = pdf_to_csv.download_pdf_tables(pdf_path, pdf_obj, save_path=CSV_PATH, pages=pages)
+            tables_obj = tables_obj+new_tables
+    
     else:
          print("Invalid input")
 
-    options_list = generics.get_options(options)
-    context_dict = generics.create_context(file, table_count, options_list)
 
-    return render(request, 'streamline/preview_page.html', context=context_dict)
+    if len(tables_obj)>0:
+        context_dict = generics.create_context(pdf_obj, tables_obj, table_type="pdf")
+        return render(request, 'streamline/preview_page.html', context=context_dict)
+    else:
+        return render(request, 'streamline/no_tables.html', context={})
 
 
-def download_file(request, url_id=0, table_id=0):
-    """
-    A view to download either a zip of all tables, or a singular table
-    table_id of 0 indicates the user wants all tables
-    """
-    if table_id == 0:
-        file_path = generics.create_zip(CSV_PATH, url_id, table_id)
-    else:  
-        table = Tables.objects.filter(Url_Id = url_id, Table_Id=table_id)
-        file_path = table.get().csv_path
-
+def download_page(request, table_ids, table_type):
+    file_path = generics.create_zip(CSV_PATH, table_ids, table_type)
     return generics.create_file_response(file_path)
     
+    
+
+
+
+
+
+    
+
+
+
