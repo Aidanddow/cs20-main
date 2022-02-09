@@ -87,13 +87,3 @@ def download_file(request, url_id=0, table_id=0):
 
     return generics.create_file_response(file_path)
     
-    
-
-
-
-
-
-    
-
-
-

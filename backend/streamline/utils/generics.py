@@ -38,8 +38,8 @@ def create_context(file, table_count, options):
     webpage_tables = Tables.objects.filter(Url_Id = file.id)
 
     #if preview is enabled
-    if options[0]:
-        tables_html = get_html_representations(webpage_tables)
+    # if options[0]:
+    tables_html = get_html_representations(webpage_tables)
 
     return { "id": file.id,
              "table_count": table_count,
@@ -49,9 +49,12 @@ def create_context(file, table_count, options):
 
 def create_zip(folder, url_id=0, table_id=0):
     '''
-    Will create and return the path to a zip file of all csv files in folder
+    Will create and return the path to a zip file of all csv files from a given url
     '''
-    os.chdir(folder)
+    try:
+        os.chdir(folder)
+    except:
+        pass
 
     # Query all tables of the given file_id
     tables = Tables.objects.filter(Url_Id = url_id)
@@ -79,4 +82,3 @@ def create_file_response(file_path):
         response = HttpResponse(file, content_type=mime_type)
         response['Content-Disposition'] = f'attachment; filename={fname}'
         return response
-

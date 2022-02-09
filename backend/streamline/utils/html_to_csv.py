@@ -14,80 +14,70 @@ from bs4 import BeautifulSoup
 import requests
 from streamline.models import Url_table, Tables
 
-'''
-Takes a url, finds all html tables and processes them,
-saving their data to xls files.
-'''
 def extract(url, web_page, save_path=None):
+    '''
+    Takes a url, finds all html tables and processes them,
+    saving their data to xls files.
+    '''
     print(f"--- Reading {url}")
 
-    tableList = []
-
-    try:
-        header = {'User-Agent': 'Mozilla/5.0'}
-        session = requests.session()
-        html = session.get(url, headers=header)
-        soup = BeautifulSoup(html.text,'lxml')
-        
-        # Get titles of tables
-        titleList = [title.text for title in soup.select('header[class*="table"]')]
-
-        tableList = soup.find_all('table')
-        
-        footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
-        footnoteList = process_footnote(footnotes)
-        
-        # Get doi from url
-        global doi
-        doi = extract_doi(url)
-        
-        for num, table in enumerate(tableList):
-            print(f"--- Processing Table {num+1}")
-            tableArray, formattedData = process_table(table)
-            try:
-                footnoteData = footnoteList[num]
-            except:
-                footnoteData = None
-
-            # If a title exists for this table, pass it
-            try:
-                if len(titleList) > num and "Table" in titleList[num]:
-                    title = titleList[num]
-                else:
-                    title = None
-            except:
-                title = None
-            
-            write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
-        
-        print("--- Finished Processing Tables!")
+    header = {'User-Agent': 'Mozilla/5.0'}
+    session = requests.session()
+    html = session.get(url, headers=header)
+    soup = BeautifulSoup(html.text,'lxml')
     
-    except FileNotFoundError:
-        print(f"--- No folder \"{save_path}\" found")
-            
-    except Exception as error:
-        print("--- Error:", error)
+    # Get titles of tables
+    titleList = [title.text for title in soup.select('header[class*="table"]')]
     
-    #give number of tables to views to create ids in database for each one
+    footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
+    footnoteList = process_footnote(footnotes)
+    
+    # Get doi from url
+    global doi
+    doi = extract_doi(url)
+
+    tableList = soup.find_all('table')
+    
+    for num, table in enumerate(tableList):
+        print(f"--- Processing Table {num+1}")
+        tableArray, formattedData = process_table(table)
+
+        if len(footnoteList) > num:
+            footnoteData = footnoteList[num]
+        else:
+            footnoteData = None
+
+        # If a title exists for this table, pass it
+        if len(titleList) > num:
+            if "Table" in titleList[num]:
+                title = titleList[num]
+        else:
+            title = None
+        
+        write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
+    
+    print("--- Finished Processing Tables!")
+    
+    # Give number of tables to views to create ids in database for each one
     return len(tableList)
     
 
-'''
-Takes footnotes for all tables and generates an list
-'''
 def process_footnote(footnotes):
-    footnoteList, alist = [], []
+    '''
+    Takes footnotes for all tables and generates an list
+    '''
+    footnoteList = []
     for footnote in footnotes:
-        for li in footnote.find_all('li'):
-            alist.append(li.text)
+        alist = [li.text for li in footnote.find_all("li")]
         footnoteList.append(alist)
-        alist = []
+
     return footnoteList
 
-'''
-Takes a html table element and generates an array corresponding to the row and column data
-'''
+
 def process_table(table):
+    '''
+    Takes a html table element and generates an array corresponding to the row and column data
+    '''
     dataList  = []
     formattedDataList = []
 
@@ -122,28 +112,25 @@ def process_table(table):
             dataList.append(tds)
     
     # Get data in bold and italics format
-    try: 
-        boldNodes1 = table.find_all('strong')
-        boldNodes2 = table.find_all('b')
-        italicsNode = table.find_all('i')
-        boldList = [bold.text for bold in boldNodes1]
-        for bold in boldNodes2:
-            boldList.append(bold.text)
-        italicsList = [i.text for i in italicsNode]
-        
-        formattedDataList.append(boldList)
-        formattedDataList.append(italicsList)
-        
-    except:
-        pass
+    boldNodes1 = table.find_all('strong')
+    boldNodes2 = table.find_all('b')
+    italicsNode = table.find_all('i')
+    italicsList = [i.text for i in italicsNode]
+    boldList = [bold.text for bold in boldNodes1]
+
+    for bold in boldNodes2:
+        boldList.append(bold.text)
+    
+    formattedDataList.append(boldList)
+    formattedDataList.append(italicsList)
 
     return dataList, formattedDataList
     
     
-'''
-Takes a 2D array and writes the data to an xls file in the Desktop
-'''
 def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, path=None):
+    '''
+    Takes a 2D array and writes the data to an xls file in the Desktop
+    '''
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
     # Count the last row 
@@ -195,17 +182,18 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     print(f"--- Saved table {num+1} to {path}")
 
 
-'''
-Should extract the doi from a url
-(Working for url of papers because only papers have doi)
-'''
 def extract_doi(url):
+    '''
+    Should extract the doi from a url
+    (Working for url of papers because only papers have doi)
     # URL will be formatted as follows
     # http:://website.domain/path?doi
+    '''
     try:
         doi = url.split("doi")[1]
         doi = doi.split("?")[0][1:]
         doi = doi.replace("/","_")
+        print(f"doi = {doi}")
     except IndexError:
         doi = ""
 
