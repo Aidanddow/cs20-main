@@ -21,6 +21,8 @@ saving their data to xls files.
 def extract(url, web_page, save_path=None):
     print(f"--- Reading {url}")
 
+    tableList = []
+
     try:
         header = {'User-Agent': 'Mozilla/5.0'}
         session = requests.session()

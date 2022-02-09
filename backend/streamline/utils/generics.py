@@ -23,6 +23,7 @@ def create_context(file, table_count, options):
             try:
                 df_csv = pd.read_csv(table.csv_path)
                 csv_html = df_csv.to_html()
+                
             except:
                 # Pandas cannot open the saved HTML to CSV due to the following:
                 # UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
