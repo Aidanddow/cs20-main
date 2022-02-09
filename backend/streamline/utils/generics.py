@@ -51,10 +51,7 @@ def create_zip(folder, url_id=0, table_id=0):
     '''
     Will create and return the path to a zip file of all csv files from a given url
     '''
-    try:
-        os.chdir(folder)
-    except:
-        pass
+    os.chdir(folder)
 
     # Query all tables of the given file_id
     tables = Tables.objects.filter(Url_Id = url_id)
