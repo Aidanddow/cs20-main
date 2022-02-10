@@ -4,7 +4,6 @@
 Streamline Tables is a web extension for Google Chrome which simplifies the process of downloading tabular data from the web. It can process tables from
 - HTML
 - PDF's
-- Images
 
 The project uses Javascript for the frontend, with a Django webapp as the backend.
 
@@ -17,7 +16,14 @@ Right click on the desired table, and the data will be downloaded as a .xls file
 
 Load Chrome extension in Chrome by going to Settings->Extensions->Load Unpacked, then selecting the project extension folder.
 
-Run the django webapp from the backend folder with 
+
+Setup the django models from the backend folder with
+```
+% rm db.sqlite3
+% python manage.py makemigrations streamline
+% python manage.py migrate
+```
+Then run the django webapp with
 ```
 % python manage.py runserver
 ```
