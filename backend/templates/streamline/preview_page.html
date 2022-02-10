@@ -18,7 +18,7 @@
                         <span class="navbar-brand mx-4 mb-0 h1">Found {{ table_count }} tables in URL {{url_id}}</span>
                         <ul class="navbar-nav">
                                 <li class="nav-item">
-                                        <a class="btn btn-outline-primary mx-4 mt-2" href="{% url 'download_page' table_ids table_type %}">Download All</a></p>
+                                        <a class="btn btn-outline-primary mx-4 mt-2" href="{% url 'download_file' table_ids table_type %}">Download All</a></p>
                                 </li>
                         </ul>
                 </nav>
@@ -28,7 +28,7 @@
                                 <li class="list-group-item p-4">
                                         <div class="d-flex flex-row align-items-center justify-content-center">
                                                 <h4 class="mb-0">TABLE ID {{ table.0 }}</h4>
-                                                <a class="btn btn-outline-primary mb-0 mx-4" href="{% url 'download_page'  table.0 table_type %}">Download</a>
+                                                <a class="btn btn-outline-primary mb-0 mx-4" href="{% url 'download_file'  table.0 table_type %}">Download</a>
                                         </div>
                                         
                                         {{table.1 | safe}}

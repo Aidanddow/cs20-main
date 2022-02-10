@@ -18,6 +18,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV_DIR = os.path.join(BASE_DIR, os.path.join('saved', 'csv'))
 PDF_DIR = os.path.join(BASE_DIR, os.path.join('saved', 'pdf'))
 
+if not os.path.exists(PDF_DIR):
+    os.mkdir(PDF_DIR)
+
+if not os.path.exists(CSV_DIR):
+    os.mkdir(CSV_DIR)
+
 MAX_ENTRIES = 50
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')

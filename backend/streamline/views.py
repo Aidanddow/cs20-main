@@ -1,4 +1,5 @@
 import re
+import os
 
 from django.shortcuts import render
 from streamline.models import Url_PDF, Url_HTML, Table_PDF, Table_HTML
@@ -9,6 +10,7 @@ from .utils import html_to_csv, pdf_to_csv, generics
 # Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
 PDF_PATH = settings.PDF_DIR
+
 
 def get_tables_from_html(request):
     '''
@@ -94,7 +96,6 @@ def get_tables_from_pdf(request):
     else:
          print("Invalid input")
 
-
     if len(tables_obj)>0:
         context_dict = generics.create_context(pdf_obj, tables_obj, table_type="pdf")
         return render(request, 'streamline/preview_page.html', context=context_dict)
@@ -102,9 +103,21 @@ def get_tables_from_pdf(request):
         return render(request, 'streamline/no_tables.html', context={})
 
 
-def download_page(request, table_ids, table_type):
-    file_path = generics.create_zip(CSV_PATH, table_ids, table_type)
+def download_file(request, table_ids, table_type):
+    """
+    A view to download either a zip of all tables, or a singular table
+    table_id of 0 indicates the user wants all tables
+    """
+    table_paths = generics.get_filepaths_from_id(table_ids, table_type)
+
+    # Only one file is selected
+    if len(table_paths) == 1:
+        file_path = table_paths[0]
+    else:
+        file_path = generics.create_zip(table_paths, folder=CSV_PATH)
+
     return generics.create_file_response(file_path)
+
     
     
 

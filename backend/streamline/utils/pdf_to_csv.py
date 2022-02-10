@@ -3,20 +3,19 @@ Download tables from pdf from terminal with
 
 % python download_pdf.py <filename>
 '''
-
 import camelot 
 import sys
 import os
 import urllib.request
 from streamline.models import Table_PDF
 
-
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'}
 
-# Simple script to download a pdf from a link - wont be used in project, just used 
-# to make sure the pdf is got, no filename handling
-def download_pdf(url, save_path=None):
 
+def download_pdf(url, save_path=None):
+    '''
+    Simple script to download a pdf from url
+    '''
     req = urllib.request.Request(url, headers=HEADERS)
     response = urllib.request.urlopen(req)
 
@@ -61,10 +60,10 @@ def download_pdf_tables(pdf_path, pdf_obj, save_path=None, pages="all"):
     return new_tables
 
 
-'''
-Transform the user input (a string) into a list of integers, each representing a page
-'''
 def pages_to_int(pages):
+    '''
+    Transform the user input (a string) into a list of integers, each representing a page
+    '''
     page_list = []
     for page in pages.split(','):
         if '-' in page:
@@ -79,11 +78,11 @@ def pages_to_int(pages):
     return page_list
 
 
-'''
-Check which tables are in the DB and return them as a list
-Also, returns the missing pages
-'''
 def get_missing_pages(page_list, pdf_obj_id, tables_obj):
+    '''
+    Check which tables are in the DB and return them as a list
+    Also, returns the missing pages
+    '''
     pages = ""
     for page in page_list:
         query = Table_PDF.objects.filter(pdf_id=pdf_obj_id, page=page)
