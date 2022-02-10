@@ -15,9 +15,13 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-CSV_DIR = os.path.join(BASE_DIR, os.path.join('saved', 'csv'))
-PDF_DIR = os.path.join(BASE_DIR, os.path.join('saved', 'pdf'))
+SAVE_DIR = os.path.join(BASE_DIR, 'saved')
+CSV_DIR = os.path.join(SAVE_DIR, 'csv')
+PDF_DIR = os.path.join(SAVE_DIR, 'pdf')
 
+if not os.path.exists(SAVE_DIR):
+    os.mkdir(SAVE_DIR)
+    
 if not os.path.exists(PDF_DIR):
     os.mkdir(PDF_DIR)
 
