@@ -48,6 +48,7 @@ def get_as_html(table):
     Returns a html representation of a table, or an error message if table couldn't be read
     '''
     try:
+        print("\n\n\n\n\n\n\n\n\nfilepath: ",table.file_path)
         df_csv = pd.read_csv(table.file_path, index_col=False)
         df_csv.fillna('', inplace=True)
         df_csv.set_index(df_csv.columns[0], inplace=True)
@@ -89,9 +90,6 @@ def create_file_response(file_path):
     with open(file_path, 'rb') as file:
         response = HttpResponse(file, content_type=mime_type)
         response['Content-Disposition'] = f'attachment; filename={fname}'
-    
-    # Remove created file from server
-    os.remove(file_path)
 
     return response
 

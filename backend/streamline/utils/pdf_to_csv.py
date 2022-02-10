@@ -83,17 +83,18 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
     Check which tables are in the DB and return them as a list
     Also, returns the missing pages
     '''
-    pages = ""
+    pages = []
     for page in page_list:
         query = Table_PDF.objects.filter(pdf_id=pdf_obj_id, page=page)
+        
         if not query:
-            pages = pages+","+str(page)
+            pages.append(str(page))
         else:
             for table in query:
+                print(table)
                 tables_obj.append(table)
-    pages = pages[1:]
 
-    return pages,tables_obj
+    return ",".join(pages), tables_obj
 
 # Temporary main method to download pdf tables from terminal
 if __name__ == "__main__":

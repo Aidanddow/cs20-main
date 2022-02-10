@@ -77,9 +77,9 @@ def get_tables_from_pdf(request):
 
             pdf_path = pdf_obj.pdf_path
 
-            pages,tables_obj = pdf_to_csv.get_missing_pages(page_list, pdf_obj.id, tables_obj)
+            pages, tables_obj = pdf_to_csv.get_missing_pages(page_list, pdf_obj.id, tables_obj)
 
-            print("Pages to request",pages)
+            print("Pages to request", pages)
 
         else:
             print("New PDF", url)
@@ -89,7 +89,7 @@ def get_tables_from_pdf(request):
             pdf_obj = Url_PDF.objects.create(url=url, pdf_path=pdf_path)
 
         #convert its table(s) into csv(s) and get table count
-        if(pages!=""):
+        if pages != "":
             new_tables = pdf_to_csv.download_pdf_tables(pdf_path, pdf_obj, save_path=CSV_PATH, pages=pages)
             tables_obj = tables_obj+new_tables
     
