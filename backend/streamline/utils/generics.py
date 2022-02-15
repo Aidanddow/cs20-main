@@ -49,11 +49,11 @@ def get_as_html(table):
     '''
     try:
         print("\n\n\n\n\n\n\n\n\nfilepath: ",table.file_path)
-        df_csv = pd.read_csv(table.file_path, index_col=False, on_bad_lines='skip')
-        df_csv.fillna('', inplace=True)
-        df_csv.set_index(df_csv.columns[0], inplace=True)
-        # df_csv.reset_index(drop=True, inplace=True)
-        csv_html = df_csv.to_html()
+        df_xls = pd.read_excel(table.file_path, index_col=False)
+        df_xls.fillna('', inplace=True)
+        df_xls.set_index(df_xls.columns[0], inplace=True)
+        # df_xls.reset_index(drop=True, inplace=True)
+        csv_html = df_xls.to_html()
 
     except UnicodeDecodeError:
         csv_html = "<p>Preview not available</p>"
