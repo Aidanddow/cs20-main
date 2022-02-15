@@ -106,6 +106,11 @@ def process_table(table):
                 data = td.text.replace("\n", "")
             else:
                 data = "-"
+
+            #replace "," in text with "-" since "," messes with the creation of the csv
+            if "," in td.text:
+                data = td.text.replace(",", "-") 
+
             tds.append(data)
         if len(tds) != 0:
             dataList.append(tds)
