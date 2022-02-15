@@ -51,6 +51,8 @@ def extract(url, web_page, save_path=None):
         if len(titleList) > num:
             if "Table" in titleList[num]:
                 title = titleList[num]
+            else:
+                title = None
         else:
             title = None
         
@@ -89,6 +91,7 @@ def process_table(table):
     except:
         pass
     
+
     trNodes = table.find_all('tr')
     
     # Get data from table
@@ -108,12 +111,12 @@ def process_table(table):
             else:
                 data = "-"
 
+
             #replace "," in text with "-" since "," messes with the creation of the csv
             if "," in td.text:
                 data = td.text.replace(",", "-") 
-                
-            if "\n" in td.text:
-                data = td.text.replace("\n", "")     
+
+            data.replace("\n", "---")     
 
             tds.append(data)
         if len(tds) != 0:
