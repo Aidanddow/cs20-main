@@ -42,19 +42,20 @@ def extract(url, web_page, save_path=None):
         print(f"--- Processing Table {num+1}")
         tableArray, formattedData = process_table(table)
 
-        footnoteData, title = None, None
-        
-        # If footnote data exists for table, pass it
         if len(footnoteList) > num:
             footnoteData = footnoteList[num]
+        else:
+            footnoteData = None
 
         # If a title exists for this table, pass it
         if len(titleList) > num:
             if "Table" in titleList[num]:
                 title = titleList[num]
+        else:
+            title = None
         
-        # write_to_xls(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
-        write_to_csv(tableArray, num, web_page, title=title, path=save_path)
+        write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
+    
     print("--- Finished Processing Tables!")
     
     # Give number of tables to views to create ids in database for each one
@@ -130,33 +131,10 @@ def process_table(table):
 
     return dataList, formattedDataList
     
-
-def write_to_csv(table, num, web_page, title=None, path=None):
-    '''
-    Takes a 2D array and writes the data to a csv file
-    '''
-    csv = title + "\n" if title else ""
     
-    table = [",".join(i) for i in table]
-    csv += "\n".join(table)
-
-    # Save the file to "path/{num}.xls"
-    global doi
-    fname = f"table{web_page.id}_{num+1}_{doi}.csv"
-
-    path = os.path.join(path, fname)
-    with open(path, 'w', encoding="utf-8") as file:
-        file.write(csv)
-
-    # Creates a new table entry every time a new file is saved
-    Table_HTML.objects.create(html_id=web_page, file_path = path)
-    
-    print(f"--- Saved table {num+1} to {path}")
-
-
-def write_to_xls(table, formattedData, footnoteData, num, web_page, title=None, path=None):
+def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, path=None):
     '''
-    Takes a 2D array and writes the data to an xls file
+    Takes a 2D array and writes the data to an xls file in the Desktop
     '''
     wbk = xlwt.Workbook()
     sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
@@ -198,7 +176,7 @@ def write_to_xls(table, formattedData, footnoteData, num, web_page, title=None, 
 
     # Save the file to "path/{num}.xls"
     global doi
-    fname = f"table{web_page.id}_{num+1}_{doi}.csv"
+    fname = f"table{web_page.id}_{num+1}_{doi}.xls"
 
     path = os.path.join(path, fname)
     wbk.save(path)
