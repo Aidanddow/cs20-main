@@ -89,26 +89,26 @@ def process_table(table):
     except:
         pass
     
-    tbodyNodes = table.find_all('tbody')
+    trNodes = table.find_all('tr')
     
     # Get data from table
-    for tbody in tbodyNodes:
-        for tr in tbody.find_all('tr'):
-            tds = []
-            for td in tr.find_all('td'):
-                # Remove link tag
-                link = td.find('a')
-                if link:
-                    link.extract()
-                sup = td.find('sup')
-                if sup:
-                    sup.extract()
-                # Get the text for each cell, replacing empty strings with a dash
-                if td.text != "":
-                    data = td.text.replace("\n", "")
-                else:
-                    data = "-"
-                tds.append(data)
+    for tr in trNodes:
+        tds = []
+        for td in tr.find_all('td'):
+            # Remove link tag
+            link = td.find('a')
+            if link:
+                link.extract()
+            sup = td.find('sup')
+            if sup:
+                sup.extract()
+            # Get the text for each cell, replacing empty strings with a dash
+            if td.text != "":
+                data = td.text.replace("\n", "")
+            else:
+                data = "-"
+            tds.append(data)
+        if len(tds) != 0:
             dataList.append(tds)
     
     # Get data in bold and italics format
