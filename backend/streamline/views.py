@@ -38,7 +38,7 @@ def get_tables_from_html(request):
     tables_obj = Table_HTML.objects.filter(html_id=html_obj.id)
     
     if tables_obj:
-        context_dict = generics.create_context(html_obj, tables_obj,table_type="html")
+        context_dict = generics.create_context(html_obj, tables_obj, table_type="html")
 
         return render(request, 'streamline/preview_page.html', context=context_dict)
     else:

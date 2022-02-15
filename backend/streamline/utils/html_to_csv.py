@@ -140,7 +140,7 @@ def write_to_csv(table, num, web_page, title=None, path=None):
     fname = f"table{web_page.id}_{num+1}_{doi}.csv"
 
     path = os.path.join(path, fname)
-    with open(path, 'w') as file:
+    with open(path, 'w', encoding="utf-8") as file:
         file.write(csv)
 
     # Creates a new table entry every time a new file is saved

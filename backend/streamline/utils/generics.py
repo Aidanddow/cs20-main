@@ -49,7 +49,7 @@ def get_as_html(table):
     '''
     try:
         print("\n\n\n\n\n\n\n\n\nfilepath: ",table.file_path)
-        df_csv = pd.read_csv(table.file_path, index_col=False)
+        df_csv = pd.read_csv(table.file_path, index_col=False, on_bad_lines='skip')
         df_csv.fillna('', inplace=True)
         df_csv.set_index(df_csv.columns[0], inplace=True)
         # df_csv.reset_index(drop=True, inplace=True)
