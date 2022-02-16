@@ -28,7 +28,8 @@ Then run the django webapp with
 % python manage.py runserver
 ```
 
-Run Instructions
+## Run Instructions
+
 Download folder containing extension (Streamline Tables Extension)
 Go to chrome://extensions
 Enable Developer Mode in top right
