@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import mimetypes
 from zipfile import ZipFile
 from django.http import HttpResponse
@@ -48,17 +49,21 @@ def get_as_html(table):
     Returns a html representation of a table, or an error message if table couldn't be read
     '''
     try:
-        print("\n\n\n\n\n\n\n\n\nfilepath: ",table.file_path)
+        print("\nfilepath: ",table.file_path)
         
         if table.file_path.endswith(".csv"):
-            df_xls = pd.read_csv(table.file_path, index_col=False)
+            df_xls = pd.read_csv(table.file_path, index_col=False, skip_blank_lines=True)
         else:
             df_xls = pd.read_excel(table.file_path, index_col=False)
-
+      
+        df_xls.dropna(how="all", inplace=True)
         df_xls.fillna('', inplace=True)
+
         df_xls.set_index(df_xls.columns[0], inplace=True)
-        # df_xls.reset_index(drop=True, inplace=True)
-        csv_html = df_xls.to_html()
+        
+        df_xls.columns = [ "" if "Unnamed:" in c else c for c in df_xls.columns]
+
+        csv_html = df_xls.to_html(classes="table table-sm table-hover table-responsive", border=0)
 
     except UnicodeDecodeError:
         csv_html = "<p>Preview not available</p>"
