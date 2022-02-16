@@ -26,11 +26,13 @@ def get_tables_from_html(request):
     # Set up options list 
     options_list = generics.get_options(options)
 
-    html_obj = Url_PDF.objects.filter(url=url).first()
+    html_obj = Url_HTML.objects.filter(url=url).first()
         
     if not html_obj:
         #store URL
         html_obj = Url_HTML.objects.create(url=url)
+        print("--- New HTML URL ---", html_obj.url)
+
         #process page
         html_to_csv.extract(url, html_obj, save_path=CSV_PATH)
     
