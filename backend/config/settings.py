@@ -28,7 +28,7 @@ if not os.path.exists(PDF_DIR):
 if not os.path.exists(CSV_DIR):
     os.mkdir(CSV_DIR)
 
-MAX_ENTRIES = 150
+MAX_ENTRIES = 250
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
