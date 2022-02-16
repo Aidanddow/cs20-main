@@ -1,7 +1,7 @@
 from tkinter import CASCADE
 from django.db import models
 from django.conf import settings
-
+from django.utils.timezone import now
 
 class Url_PDF(models.Model):
     id = models.AutoField(primary_key=True)
@@ -10,6 +10,7 @@ class Url_PDF(models.Model):
     # author = models.CharField(max_length=200)
     # doi = models.CharField(max_length=200)
     pdf_path = models.FilePathField(null=True, default=None)
+    created = models.DateTimeField(default=now)
 
     def save(self, *args, **kwargs):
         if Url_PDF.objects.count()>=settings.MAX_ENTRIES:
@@ -21,6 +22,8 @@ class Url_PDF(models.Model):
 class Url_HTML(models.Model):
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=200)
+    created = models.DateTimeField(default=now)
+
 
     def save(self, *args, **kwargs):
         if Url_HTML.objects.count()>=settings.MAX_ENTRIES:

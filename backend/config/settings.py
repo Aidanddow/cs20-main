@@ -30,6 +30,13 @@ if not os.path.exists(CSV_DIR):
 
 MAX_ENTRIES = 250
 
+# Time interval for the database cleaning task (in hours)
+CLEANING_INTERVAL = 4
+
+# Tuple time to live (in hours) - The time threshold after which a tuple can be deleted
+# For a CLEANING_INTERVAL = 4 and TUPLE_TTL = 2, a tuple could be deleted after a min of 4 hours and up to ~6 hours
+TUPLE_TTL = 2
+
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 
