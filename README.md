@@ -30,14 +30,15 @@ Then run the django webapp with
 
 ## Run Instructions
 
-Download folder containing extension (Streamline Tables Extension)
+Download folder containing extension (extension)
 Go to chrome://extensions
 Enable Developer Mode in top right
 Select load unpacked in top left
 Navigate to folder and select
-Extension should now be installed and can be integrated with
+Extension should now be installed
 
 NOTE: this does not need to be done each time you reopen chrome
+NOTE: Does not work unless server is running 
 
 When updating the code for the extension, the extension automatically updates when you save your changes, no need to redo the steps above
 
