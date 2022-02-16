@@ -53,7 +53,7 @@ def get_tables_from_pdf(request):
     pages = request.GET.get('pages', None)
     options = request.GET.get('options', None)
 
-    print('topic-PDF:', url)
+    print('\ntopic-PDF:', url)
     print('pages-PDF:', pages)
     print('options', options)
     #options - contains string of 01s to indicate true/falses 
@@ -66,23 +66,21 @@ def get_tables_from_pdf(request):
     # Check if page input is valid
     if (re.search(regex, pages)):
 
-        print("Valid input")
+        print("\n--- Valid input")
 
         pdf_obj = Url_PDF.objects.filter(url=url).first()
         
         page_list = pdf_to_csv.pages_to_int(pages)
 
         if pdf_obj:
-            print("PDF Found")
+            print("--- PDF Found ---", pdf_obj.url)
 
             pdf_path = pdf_obj.pdf_path
 
             pages, tables_obj = pdf_to_csv.get_missing_pages(page_list, pdf_obj.id, tables_obj)
-
-            print("Pages to request", pages)
-
+            
         else:
-            print("New PDF", url)
+            print("--- New PDF ---", url)
             # downloads pdf from right click
             pdf_path = pdf_to_csv.download_pdf(url, save_path=PDF_PATH)
             # store URL
@@ -94,7 +92,7 @@ def get_tables_from_pdf(request):
             tables_obj = tables_obj+new_tables
     
     else:
-         print("Invalid input")
+         print("\n--- Invalid input")
 
     if len(tables_obj)>0:
         context_dict = generics.create_context(pdf_obj, tables_obj, table_type="pdf")

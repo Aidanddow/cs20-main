@@ -42,7 +42,6 @@ def download_pdf_tables(pdf_path, pdf_obj, save_path=None, pages="all"):
     new_tables = []
 
     if len(tables) > 0:
-        print(f"--- Saving {len(tables)} tables to CSV")
         
         # saves files with custom name
         for i in range(len(tables)):            
@@ -63,7 +62,12 @@ def download_pdf_tables(pdf_path, pdf_obj, save_path=None, pages="all"):
 def pages_to_int(pages):
     '''
     Transform the user input (a string) into a list of integers, each representing a page
+    Returns "all" if "all" is given
     '''
+
+    if(pages=="all"):
+        return pages
+
     page_list = []
     for page in pages.split(','):
         if '-' in page:
@@ -83,6 +87,20 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
     Check which tables are in the DB and return them as a list
     Also, returns the missing pages
     '''
+
+    if(page_list=="all"):
+        query = Table_PDF.objects.filter(pdf_id=pdf_obj_id)
+        
+        print("--- Found {n_tables} tables".format(n_tables = len(query)))
+
+        for table in query:
+            tables_obj.append(table)
+
+        print("--- Missing pages: None")
+        
+        return "", tables_obj
+            
+
     pages = []
     for page in page_list:
         query = Table_PDF.objects.filter(pdf_id=pdf_obj_id, page=page)
@@ -91,10 +109,12 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
             pages.append(str(page))
         else:
             for table in query:
-                print(table)
                 tables_obj.append(table)
 
-    return ",".join(pages), tables_obj
+    missing_pages = ",".join(pages)
+    print("--- Missing pages:", (missing_pages if missing_pages!="" else "None"))
+
+    return missing_pages, tables_obj
 
 # Temporary main method to download pdf tables from terminal
 if __name__ == "__main__":
