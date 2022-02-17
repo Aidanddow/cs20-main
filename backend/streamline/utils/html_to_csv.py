@@ -8,6 +8,7 @@ To run by itself,
 '''
 
 import sys, os
+import re
 import xlwt
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -26,15 +27,18 @@ def extract(url, web_page, save_path=None):
     html = session.get(url, headers=header)
     soup = BeautifulSoup(html.text,'lxml')
     
-    # Get titles of tables
+    # Get titles, and footnotes of tables
     titleList = [title.text for title in soup.select('header[class*="table"]')]
     
     footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
     footnoteList = process_footnote(footnotes)
     
-    # Get doi from url
+    # Get doi from url. If not found, try to find in the rest of page
     global doi
     doi = extract_doi(url)
+
+    if doi == "":
+        doi = extract_doi(soup.text)
 
     tableList = soup.find_all('table')
     
@@ -48,13 +52,11 @@ def extract(url, web_page, save_path=None):
             footnoteData = None
 
         # If a title exists for this table, pass it
+        title = None
+
         if len(titleList) > num:
             if "Table" in titleList[num]:
                 title = titleList[num]
-            else:
-                title = None
-        else:
-            title = None
         
         write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
     
@@ -66,32 +68,21 @@ def extract(url, web_page, save_path=None):
 
 def process_footnote(footnotes):
     '''
-    Takes footnotes for all tables and generates an list
+    Returns a list with a list of <li> items from each tables footnotes
     '''
-    footnoteList = []
-    for footnote in footnotes:
-        alist = [li.text for li in footnote.find_all("li")]
-        footnoteList.append(alist)
-
-    return footnoteList
-
+    return [ [li.text for li in fn.find_all("li")] for fn in footnotes]
+    
 
 def process_table(table):
     '''
     Takes a html table element and generates an array corresponding to the row and column data
     '''
-    dataList  = []
-    formattedDataList = []
-
-    try: 
-        theadList = [th.text for th in table.find_all('th')]
-        dataList.append(theadList)
-
-    # No table header information
-    except:
-        pass
+    dataList, formattedDataList  = [], []
+    headers = table.find_all("th")
     
-
+    if headers:
+        dataList.append([h.text for h in headers])
+    
     trNodes = table.find_all('tr')
     
     # Get data from table
@@ -110,7 +101,6 @@ def process_table(table):
                 data = td.text.replace("\n", "")
             else:
                 data = "-"
-
 
             #replace "," in text with "-" since "," messes with the creation of the csv
             # if "," in td.text:
@@ -193,22 +183,18 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     print(f"--- Saved table {num+1} to {path}")
 
 
-def extract_doi(url):
+def extract_doi(text):
     '''
-    Should extract the doi from a url
-    (Working for url of papers because only papers have doi)
-    # URL will be formatted as follows
-    # http:://website.domain/path?doi
+    Should extract the doi if it is present from either a url, or html body
+    Regex found at: https://www.crossref.org/blog/dois-and-matching-regular-expressions/
+    https://stackoverflow.com/questions/27910/finding-a-doi-in-a-document-or-page
     '''
-    try:
-        doi = url.split("doi")[1]
-        doi = doi.split("?")[0][1:]
-        doi = doi.replace("/","_")
-        print(f"doi = {doi}")
-    except IndexError:
-        doi = ""
+    doi_regex = r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/\S+)'
+    groups = re.search(doi_regex, text)
+    doi = groups.group(1) if groups else ""
 
-    return doi
+    print(f"doi = {doi}")
+    return doi.replace("/","_")
 
 
 if __name__ == '__main__':
