@@ -1,6 +1,5 @@
 import re
 import os
-
 from django.shortcuts import render
 from streamline.models import Url_PDF, Url_HTML, Table_PDF, Table_HTML
 from django.conf import settings

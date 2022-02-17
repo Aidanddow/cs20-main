@@ -1,19 +1,10 @@
-'''
-Need to install bs4 and lxml in advance
-% pip install bs4
-% pip install lxml
-
-To run by itself,
-% python extract.py <url>
-'''
-
 import sys, os
-import re
 import xlwt
 from pathlib import Path
 from bs4 import BeautifulSoup
 import requests
 from streamline.models import Table_HTML
+from . import generics
 
 def extract(url, web_page, save_path=None):
     '''
@@ -34,11 +25,10 @@ def extract(url, web_page, save_path=None):
     footnoteList = process_footnote(footnotes)
     
     # Get doi from url. If not found, try to find in the rest of page
-    global doi
-    doi = extract_doi(url)
+    web_page.doi = generics.extract_doi(url)
 
-    if doi == "":
-        doi = extract_doi(soup.text)
+    if web_page.doi == "":
+        web_page.doi = generics.extract_doi(soup.text)
 
     tableList = soup.find_all('table')
     
@@ -171,8 +161,7 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
             line += 1
 
     # Save the file to "path/{num}.xls"
-    global doi
-    fname = f"table{web_page.id}_{num+1}_{doi}.xls"
+    fname = f"table{web_page.id}_{num+1}_{web_page.doi}.xls"
 
     path = os.path.join(path, fname)
     wbk.save(path)
@@ -181,20 +170,6 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     Table_HTML.objects.create(html_id=web_page, file_path = path)
     
     print(f"--- Saved table {num+1} to {path}")
-
-
-def extract_doi(text):
-    '''
-    Should extract the doi if it is present from either a url, or html body
-    Regex found at: https://www.crossref.org/blog/dois-and-matching-regular-expressions/
-    https://stackoverflow.com/questions/27910/finding-a-doi-in-a-document-or-page
-    '''
-    doi_regex = r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/\S+)'
-    groups = re.search(doi_regex, text)
-    doi = groups.group(1) if groups else ""
-
-    print(f"doi = {doi}")
-    return doi.replace("/","_")
 
 
 if __name__ == '__main__':

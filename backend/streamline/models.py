@@ -6,9 +6,6 @@ from django.utils.timezone import now
 class Url_PDF(models.Model):
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=200)
-    # title = models.CharField(max_length=200)
-    # author = models.CharField(max_length=200)
-    # doi = models.CharField(max_length=200)
     pdf_path = models.FilePathField(null=True, default=None)
     created = models.DateTimeField(default=now)
 
@@ -22,6 +19,7 @@ class Url_PDF(models.Model):
 class Url_HTML(models.Model):
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=200)
+    doi = models.CharField(max_length=200, default="")
     created = models.DateTimeField(default=now)
 
 

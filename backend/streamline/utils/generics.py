@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 import numpy as np
 import mimetypes
@@ -24,6 +25,19 @@ def create_zip(paths, folder=settings.CSV_DIR, zipPath="tables.zip"):
             zipFile.write(os.path.basename(path))
     
     return os.path.abspath(zipPath)
+
+def extract_doi(text):
+    '''
+    Should extract the doi if it is present from either a url, or html body
+    Regex found at: https://www.crossref.org/blog/dois-and-matching-regular-expressions/
+    https://stackoverflow.com/questions/27910/finding-a-doi-in-a-document-or-page
+    '''
+    doi_regex = r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/\S+)'
+    groups = re.search(doi_regex, text)
+    doi = groups.group(1) if groups else ""
+
+    print(f"doi = {doi}")
+    return doi.replace("/","_")
 
 
 def get_filepaths_from_id(table_ids, table_type):
@@ -77,6 +91,8 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
     '''
     table_ids = ",".join([str(table.id) for table in tables_obj])
     tables_html = [( str(table.id), get_as_html(table) ) for table in tables_obj]
+
+    print(f"\n\n\n\n\n\n\n\n\n\nurl_doi: {url_obj.doi} \n\n\n\n\n\n\n\n\n\n\n")
 
     context_dict = { "url_id": url_obj.id,
                      "table_count": len(tables_obj),
