@@ -23,6 +23,7 @@ def extract(url, web_page, save_path=None):
     
     footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
     footnoteList = process_footnote(footnotes)
+
     
     # Get doi from url. If not found, try to find in the rest of page
     web_page.doi = generics.extract_doi(url)
@@ -176,7 +177,7 @@ if __name__ == '__main__':
     try:
         url = sys.argv[1]
         #url = "https://dom-pubs.onlinelibrary.wiley.com/doi/10.1111/dom.12903"
-        doi = extract_doi(url)
+        doi = generics.extract_doi(url)
 
         CSV_PATH = os.path.join(Path.home(), "Desktop")
         extract(url, web_page=0, save_path=CSV_PATH)
