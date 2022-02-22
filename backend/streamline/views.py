@@ -19,11 +19,16 @@ def get_tables_from_html(request):
     url = request.GET.get('topic', None)
     options = request.GET.get('options', None)
 
+    if(url==None):
+        print("\n--- No URL found")
+        return render(request, 'streamline/no_tables.html', context={})
+
     print('topic-HTML:', url)
     print('options', options)
 
     # Set up options list 
-    options_list = generics.get_options(options)
+    if(options):
+        options_list = generics.get_options(options)
 
     html_obj = Url_HTML.objects.filter(url=url).first()
         
@@ -54,11 +59,18 @@ def get_tables_from_pdf(request):
     pages = request.GET.get('pages', None)
     options = request.GET.get('options', None)
 
+    if(pages==None or url==None):
+        print("\n--- No URL/Pages found")
+        return render(request, 'streamline/no_tables.html', context={})
+
+
     print('\ntopic-PDF:', url)
     print('pages-PDF:', pages)
     print('options', options)
+
     #options - contains string of 01s to indicate true/falses 
-    options_list = generics.get_options(options)
+    if(options):
+        options_list = generics.get_options(options)
 
     regex = "^all$|^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$"
 
