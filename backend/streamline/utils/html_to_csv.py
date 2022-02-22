@@ -176,7 +176,7 @@ if __name__ == '__main__':
     try:
         url = sys.argv[1]
         #url = "https://dom-pubs.onlinelibrary.wiley.com/doi/10.1111/dom.12903"
-        doi = extract_doi(url)
+        doi = generics.extract_doi(url)
 
         CSV_PATH = os.path.join(Path.home(), "Desktop")
         extract(url, web_page=0, save_path=CSV_PATH)
