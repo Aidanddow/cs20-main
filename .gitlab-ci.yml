@@ -1,0 +1,9 @@
+image: python:3.9
+
+django_tests:
+    script:
+        - python manage.py test
+    
+    when: on_success
+    only:
+        - developer 

@@ -1,10 +1,9 @@
 import os
 import re
 import pandas as pd
-import numpy as np
 import mimetypes
 from zipfile import ZipFile
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.conf import settings
 from streamline.models import Table_PDF, Table_HTML
 
@@ -49,11 +48,15 @@ def get_filepaths_from_id(table_ids, table_type):
     if table_type == "pdf":
         for table_id in table_ids.split(","):
             table_obj = Table_PDF.objects.filter(id = int(table_id)).first()
-            table_paths.append(table_obj.file_path)
+            
+            if(table_obj):
+                table_paths.append(table_obj.file_path)
     else:
         for table_id in table_ids.split(","):
             table_obj = Table_HTML.objects.filter(id = int(table_id)).first()
-            table_paths.append(table_obj.file_path)
+            
+            if(table_obj):
+                table_paths.append(table_obj.file_path)
     
     return table_paths
 
@@ -79,7 +82,7 @@ def get_as_html(table):
 
         csv_html = df_xls.to_html(classes="table table-sm table-hover table-responsive", border=0)
 
-    except UnicodeDecodeError:
+    except:
         csv_html = "<p>Preview not available</p>"
 
     return csv_html
@@ -92,7 +95,7 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
     table_ids = ",".join([str(table.id) for table in tables_obj])
     tables_html = [( str(table.id), get_as_html(table) ) for table in tables_obj]
 
-    print(f"\n\n\n\n\n\n\n\n\n\nurl_doi: {url_obj.doi} \n\n\n\n\n\n\n\n\n\n\n")
+    #print(f"\n\n\n\n\n\n\n\n\n\nurl_doi: {url_obj.doi} \n\n\n\n\n\n\n\n\n\n\n")
 
     context_dict = { "url_id": url_obj.id,
                      "table_count": len(tables_obj),
@@ -113,9 +116,12 @@ def create_file_response(file_path):
     mime_type, _ = mimetypes.guess_type(file_path)
     fname = os.path.basename(file_path)
 
-    with open(file_path, 'rb') as file:
-        response = HttpResponse(file, content_type=mime_type)
-        response['Content-Disposition'] = f'attachment; filename={fname}'
+    if(os.path.isfile(file_path)):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file, content_type=mime_type)
+            response['Content-Disposition'] = f'attachment; filename={fname}'
 
-    return response
+        return response
 
+    print("--- File(s) cannot be downloaded")
+    return HttpResponseNotFound("<h1>File(s) cannot be downloaded</h1>")
