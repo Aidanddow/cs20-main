@@ -37,9 +37,13 @@ def download_pdf_tables(pdf_path, pdf_obj, save_path=None, pages="all"):
     print("--- Checking for tables in page", pages)
     print("--- PDF PATH ---", pdf_path)
 
-    tables = camelot.read_pdf(pdf_path, pages=pages, flavor="stream", edge_tol=100)
-
     new_tables = []
+
+    try:
+        tables = camelot.read_pdf(pdf_path, pages=pages, flavor="stream", edge_tol=100)
+    except:
+        print("--- PDF is not valid")
+        return new_tables
 
     if len(tables) > 0:
         
@@ -125,4 +129,3 @@ if __name__ == "__main__":
         print("No pdf file provided")
     except Exception as e:
         print("Error", e)
-

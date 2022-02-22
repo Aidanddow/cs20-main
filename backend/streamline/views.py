@@ -1,5 +1,5 @@
 import re
-import os
+from django.http import HttpResponseNotFound, HttpResponseBadRequest
 from django.shortcuts import render
 from streamline.models import Url_PDF, Url_HTML, Table_PDF, Table_HTML
 from django.conf import settings
@@ -21,7 +21,7 @@ def get_tables_from_html(request):
 
     if(url==None):
         print("\n--- No URL found")
-        return render(request, 'streamline/no_tables.html', context={})
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
     print('topic-HTML:', url)
     print('options', options)
@@ -55,14 +55,14 @@ def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
     '''
+
     url = request.GET.get('topic', None)
     pages = request.GET.get('pages', None)
     options = request.GET.get('options', None)
 
     if(pages==None or url==None):
         print("\n--- No URL/Pages found")
-        return render(request, 'streamline/no_tables.html', context={})
-
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
     print('\ntopic-PDF:', url)
     print('pages-PDF:', pages)
@@ -105,7 +105,9 @@ def get_tables_from_pdf(request):
             tables_obj = tables_obj+new_tables
     
     else:
-         print("\n--- Invalid input")
+        print("\n--- Invalid input")
+        return HttpResponseBadRequest("<h1>Invalid Input</h1>")
+
 
     if len(tables_obj)>0:
         context_dict = generics.create_context(pdf_obj, tables_obj, table_type="pdf")
@@ -119,24 +121,22 @@ def download_file(request, table_ids, table_type):
     A view to download either a zip of all tables, or a singular table
     table_id of 0 indicates the user wants all tables
     """
+
+    if(table_ids==None or table_type==None):
+        print("\n--- Invalid Download request")
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
+
     table_paths = generics.get_filepaths_from_id(table_ids, table_type)
 
     # Only one file is selected
+
+    if(len(table_paths)==0):
+        print("\n--- File(s) not found")
+        return HttpResponseNotFound("<h1>File(s) not found</h1>")
+
     if len(table_paths) == 1:
         file_path = table_paths[0]
     else:
         file_path = generics.create_zip(table_paths, folder=CSV_PATH)
 
     return generics.create_file_response(file_path)
-
-    
-    
-
-
-
-
-
-    
-
-
-
