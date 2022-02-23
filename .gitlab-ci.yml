@@ -6,12 +6,12 @@ django_tests:
     script:
         - pip3 install -r backend/requirements.txt
         - pip3 install opencv-python-headless
-        
+
         - python3 backend/manage.py makemigrations
         - python3 backend/manage.py migrate
         - python3 backend/manage.py check
 
-        - python3 backend/manage.py test
+        - python backend/manage.py test
     
     only:
         - developer 
