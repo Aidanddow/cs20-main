@@ -4,8 +4,8 @@ django_tests:
     tags:
         - docker
     script:
-        - RUN apt-get update
-        - RUN apt-get install ffmpeg libsm6 libxext6  -y  
+        - sudo apt-get update
+        - sudo apt-get install ffmpeg libsm6 libxext6  -y  
         - pip3 install opencv-python
         - pip3 install -r backend/requirements.txt
 
