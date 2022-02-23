@@ -4,7 +4,7 @@ django_tests:
     tags:
         - docker
     script:
-
+        - pip3 install opencv-python
         - pip3 install -r backend/requirements.txt
 
         - python3 backend/manage.py makemigrations
