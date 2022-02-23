@@ -77,10 +77,41 @@ def process_table(table):
     Takes a html table element and generates an array corresponding to the row and column data
     '''
     dataList, formattedDataList  = [], []
-    headers = table.find_all("th")
+    #headers = table.find_all("th")
+
+
+    theadNodes = table.find_all("thead")
+    #loop through each tables thead tag
+    for thead in theadNodes:    
+        rows = thead.find_all("tr")
+
+        #loop through each row in the tables headings 
+        for row in rows:
+            #add space for each row for the row headings on the left side of the table
+            tds = [""]
+            columns = row.find_all("th")
+            
+            #loop through each column heading for this row
+            for column in columns:
+                data = column.text
+                           
+                if "\n" in data:
+                    data = data.replace("\n", " ")
+
+                if data != "":
+                    tds.append(data)
+
+                #offest if the colspan is greater than 0
+                colspan = column.attrs.get("colspan", 0)
+                if colspan != 0 and colspan.isdigit():
+                    for i in range(int(colspan) - 1):
+                        tds.append("")
+
+            if len(tds) != 0:
+                dataList.append(tds)
     
-    if headers:
-        dataList.append([h.text for h in headers])
+    # if headers:
+    #     dataList.append([h.text for h in headers])
     
     trNodes = table.find_all('tr')
     
