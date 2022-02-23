@@ -3,6 +3,7 @@ import xlwt
 from pathlib import Path
 from bs4 import BeautifulSoup
 import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from streamline.models import Table_HTML
 from . import generics
 
@@ -15,7 +16,13 @@ def extract(url, web_page, save_path=None):
 
     header = {'User-Agent': 'Mozilla/5.0'}
     session = requests.session()
-    html = session.get(url, headers=header)
+    try:
+        html = session.get(url, headers=header)
+    except requests.exceptions.ConnectionError as e:
+        # Disable InsecureRequestWarning
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+        # close SSL verify to solve SSL error. This gives a InsecureRequestWarning
+        html = session.get(url, headers=header, verify=False)
     soup = BeautifulSoup(html.text,'lxml')
     
     # Get titles, and footnotes of tables
