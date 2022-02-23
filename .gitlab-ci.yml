@@ -4,9 +4,9 @@ django_tests:
     tags:
         - docker
     script:
-        - pip3 install opencv-python-headless
         - pip3 install -r backend/requirements.txt
-
+        - pip3 install opencv-python-headless
+        
         - python3 backend/manage.py makemigrations
         - python3 backend/manage.py migrate
         - python3 backend/manage.py check
