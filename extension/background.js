@@ -58,7 +58,7 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 				pages = pages.replace(/\s/g, '')
 				
 				if(pages){
-					chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_pdf/?topic='+ encodeURIComponent(url)
+					chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_pdf/?url='+ encodeURIComponent(url)
 					+'&pages='+pages + '&options=' + options});
 
 					// fetch(url)
@@ -77,7 +77,7 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 				//Create URL and page url to give to get_page_data function 
 				//var UrlId = serverhost + '/streamline/get_page_data_HTML/?topic='+ encodeURIComponent(info["pageUrl"]);
 
-				chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_HTML/?topic='+ encodeURIComponent(info["pageUrl"])
+				chrome.tabs.create({active: true, url: serverhost + '/streamline/get_page_data_HTML/?url='+ encodeURIComponent(info["pageUrl"])
 				+ '&options=' + options});
 
 				fetch(url)
