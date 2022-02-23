@@ -1,9 +1,10 @@
 image: python:3.9
 
 django_tests:
+    tags:
+        - docker
     script:
-        - python manage.py test
+        - python3 manage.py test
     
-    when: on_success
     only:
         - developer 
