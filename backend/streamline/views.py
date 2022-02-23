@@ -45,8 +45,8 @@ def get_tables_from_html(request):
     
     if tables_obj:
         context_dict = generics.create_context(html_obj, tables_obj, table_type="html")
-
         return render(request, 'streamline/preview_page.html', context=context_dict)
+    
     else:
         return render(request, 'streamline/no_tables.html', context={})
 
@@ -55,12 +55,11 @@ def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
     '''
-
     url = request.GET.get('topic', None)
     pages = request.GET.get('pages', None)
     options = request.GET.get('options', None)
 
-    if(pages==None or url==None):
+    if not pages or not url:
         print("\n--- No URL/Pages found")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
@@ -69,15 +68,12 @@ def get_tables_from_pdf(request):
     print('options', options)
 
     #options - contains string of 01s to indicate true/falses 
-    if(options):
-        options_list = generics.get_options(options)
-
-    regex = "^all$|^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$"
+    options_list = generics.get_options(options)
 
     tables_obj = []
 
     # Check if page input is valid
-    if (re.search(regex, pages)):
+    if generics.check_valid_page_input(pages):
 
         print("\n--- Valid input")
 
@@ -85,6 +81,7 @@ def get_tables_from_pdf(request):
         
         page_list = pdf_to_csv.pages_to_int(pages)
 
+        # If the pdf already exists in db
         if pdf_obj:
             print("--- PDF Found ---", pdf_obj.url)
 
@@ -102,16 +99,16 @@ def get_tables_from_pdf(request):
         #convert its table(s) into csv(s) and get table count
         if pages != "":
             new_tables = pdf_to_csv.download_pdf_tables(pdf_path, pdf_obj, save_path=CSV_PATH, pages=pages)
-            tables_obj = tables_obj+new_tables
+            tables_obj = tables_obj + new_tables
     
     else:
         print("\n--- Invalid input")
         return HttpResponseBadRequest("<h1>Invalid Input</h1>")
 
-
-    if len(tables_obj)>0:
+    if len(tables_obj) > 0:
         context_dict = generics.create_context(pdf_obj, tables_obj, table_type="pdf")
         return render(request, 'streamline/preview_page.html', context=context_dict)
+
     else:
         return render(request, 'streamline/no_tables.html', context={})
 
@@ -122,7 +119,7 @@ def download_file(request, table_ids, table_type):
     table_id of 0 indicates the user wants all tables
     """
 
-    if(table_ids==None or table_type==None):
+    if table_ids == None or table_type == None:
         print("\n--- Invalid Download request")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
@@ -130,7 +127,7 @@ def download_file(request, table_ids, table_type):
 
     # Only one file is selected
 
-    if(len(table_paths)==0):
+    if len(table_paths) == 0:
         print("\n--- File(s) not found")
         return HttpResponseNotFound("<h1>File(s) not found</h1>")
 
