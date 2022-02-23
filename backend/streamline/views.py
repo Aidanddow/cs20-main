@@ -16,19 +16,18 @@ def get_tables_from_html(request):
     Extracts table data from HTML
     '''
     # Get url and options
-    url = request.GET.get('topic', None)
+    url = request.GET.get('url', None)
     options = request.GET.get('options', None)
 
-    if(url==None):
+    if not url:
         print("\n--- No URL found")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
-    print('topic-HTML:', url)
+    print('url:', url)
     print('options', options)
 
     # Set up options list 
-    if(options):
-        options_list = generics.get_options(options)
+    options_list = generics.get_options(options)
 
     html_obj = Url_HTML.objects.filter(url=url).first()
         
@@ -55,7 +54,7 @@ def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
     '''
-    url = request.GET.get('topic', None)
+    url = request.GET.get('url', None)
     pages = request.GET.get('pages', None)
     options = request.GET.get('options', None)
 
@@ -63,8 +62,8 @@ def get_tables_from_pdf(request):
         print("\n--- No URL/Pages found")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
-    print('\ntopic-PDF:', url)
-    print('pages-PDF:', pages)
+    print('\nurl:', url)
+    print('pages:', pages)
     print('options', options)
 
     #options - contains string of 01s to indicate true/falses 

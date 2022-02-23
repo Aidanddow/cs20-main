@@ -25,14 +25,14 @@ class TestTablesFromPdf(TestCase):
 
     def test_get_tables_from_pdf_GET(self):
 
-        response = self.client.get(self.get_tables_from_pdf_url, {'topic':"test.pdf", 'pages':"6"})
+        response = self.client.get(self.get_tables_from_pdf_url, {'url':"test.pdf", 'pages':"6"})
         
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'streamline/preview_page.html')
 
     def test_get_tables_from_pdf_no_tables(self):
 
-        response = self.client.get(self.get_tables_from_pdf_url, {'topic':"test.pdf", 'pages':"1"})
+        response = self.client.get(self.get_tables_from_pdf_url, {'url':"test.pdf", 'pages':"1"})
         
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'streamline/no_tables.html')
@@ -45,7 +45,7 @@ class TestTablesFromPdf(TestCase):
 
     def test_get_tables_from_pdf_invalid_input(self):
 
-        response = self.client.get(self.get_tables_from_pdf_url, {'topic':"test.pdf", 'pages':"abc"})
+        response = self.client.get(self.get_tables_from_pdf_url, {'url':"test.pdf", 'pages':"abc"})
         
         self.assertEquals(response.status_code, 400)
 
@@ -75,14 +75,14 @@ class TestTablesFromHtml(TestCase):
 
     def test_get_tables_from_html_GET(self):
 
-        response = self.client.get(self.get_tables_from_html_url, {'topic':'test.com'})
+        response = self.client.get(self.get_tables_from_html_url, {'url':'test.com'})
         
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'streamline/preview_page.html')
 
     def test_get_tables_from_html_no_tables(self):
 
-        response = self.client.get(self.get_tables_from_html_url, {'topic':'test2.com'})
+        response = self.client.get(self.get_tables_from_html_url, {'url':'test2.com'})
         
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'streamline/no_tables.html')

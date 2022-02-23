@@ -41,7 +41,7 @@ def extract_doi(text):
     Regex found at: https://www.crossref.org/blog/dois-and-matching-regular-expressions/
     https://stackoverflow.com/questions/27910/finding-a-doi-in-a-document-or-page
     '''
-    doi_regex = r"\b(10[.][0-9]{4,}(?:[.][0-9]+)*/\S+)"
+    doi_regex = "\b(10[.][0-9]{4,}(?:[.][0-9]+)*/\S+)"
     groups = re.search(doi_regex, text)
     doi = groups.group(1) if groups else ""
 
