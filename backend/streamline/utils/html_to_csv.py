@@ -68,7 +68,8 @@ def process_footnote(footnotes):
     '''
     Returns a list with a list of <li> items from each tables footnotes
     '''
-    return [ [li.text for li in fn.find_all("li")] for fn in footnotes]
+    # Remove '\n' and more than one space 
+    return [ [" ".join(li.text.split()) for li in fn.find_all("li")] for fn in footnotes]
     
 
 def process_table(table):
@@ -96,7 +97,8 @@ def process_table(table):
                 sup.extract()
             # Get the text for each cell, replacing empty strings with a dash
             if td.text != "":
-                data = td.text.replace("\n", "")
+                # Remove '\n' and more than one space
+                data = " ".join(td.text.split())
             else:
                 data = "-"
 
