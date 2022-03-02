@@ -10,9 +10,8 @@ from streamline.models import Table_PDF, Table_HTML
 def get_options(options):
     '''
     Receives a string of 1's and 0's corresponding to different user settings
-    '''
-    if options:
-        return [int(char) if char.isdigit() else 1 for char in options]
+    ''' 
+    return [int(char) if char.isdigit() else 1 for char in options] if options else []
 
 
 def create_zip(paths, folder=settings.CSV_DIR, zipPath="tables.zip"):
@@ -42,8 +41,11 @@ def extract_doi(text):
     https://stackoverflow.com/questions/27910/finding-a-doi-in-a-document-or-page
     '''
     doi_regex = "\b(10[.][0-9]{4,}(?:[.][0-9]+)*/\S+)"
-    groups = re.search(doi_regex, text)
-    doi = groups.group(1) if groups else ""
+
+    if (groups := re.search(doi_regex, text)):
+        doi = groups.group(1)
+    else:
+        doi = ""
 
     print(f"doi = {doi}")
     return doi.replace("/","_")
@@ -57,9 +59,8 @@ def get_filepaths_from_id(table_ids, table_type):
     table_model = Table_PDF if table_type == "pdf" else Table_HTML
     
     for table_id in table_ids.split(","):
-        table_obj = table_model.objects.filter(id = int(table_id)).first()
         
-        if table_obj:
+        if (table_obj := table_model.objects.filter(id = int(table_id)).first()):
             table_paths.append(table_obj.file_path)
     
     return table_paths
@@ -82,7 +83,7 @@ def get_as_html(table):
 
         df_xls.set_index(df_xls.columns[0], inplace=True)
         
-        df_xls.columns = [ "" if "Unnamed:" in c else c for c in df_xls.columns]
+        df_xls.columns = [ "" if "Unnamed:" in c else c for c in df_xls.columns ]
 
         csv_html = df_xls.to_html(classes="table table-sm table-hover table-responsive", border=0)
 
@@ -118,12 +119,13 @@ def create_file_response(file_path):
     mime_type, _ = mimetypes.guess_type(file_path)
     fname = os.path.basename(file_path)
 
-    if os.path.isfile(file_path):
-        with open(file_path, 'rb') as file:
-            response = HttpResponse(file, content_type=mime_type)
-            response['Content-Disposition'] = f'attachment; filename={fname}'
+    if not os.path.isfile(file_path):
+        print("--- File(s) cannot be downloaded")
+        return HttpResponseNotFound("<h1>File(s) cannot be downloaded</h1>")
 
+    with open(file_path, 'rb') as file:
+        response = HttpResponse(file, content_type=mime_type)
+        response['Content-Disposition'] = f'attachment; filename={fname}'
         return response
 
-    print("--- File(s) cannot be downloaded")
-    return HttpResponseNotFound("<h1>File(s) cannot be downloaded</h1>")
+    

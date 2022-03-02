@@ -68,18 +68,15 @@ def pages_to_int(pages):
     Transform the user input (a string) into a list of integers, each representing a page
     Returns "all" if "all" is given
     '''
-
-    if(pages=="all"):
+    if pages == "all": 
         return pages
 
     page_list = []
     for page in pages.split(','):
         if '-' in page:
             page = page.split('-')
-
             page_range = list(range(int(page[0]), int(page[1])+1))
-
-            page_list = page_list+page_range
+            page_list += page_range
         else:
             page_list.append(page)
     
@@ -92,31 +89,28 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
     Also, returns the missing pages
     '''
 
-    if(page_list=="all"):
-        query = Table_PDF.objects.filter(pdf_id=pdf_obj_id)
+    if page_list == "all":
         
         print(f"--- Found {len(query)} tables")
 
-        for table in query:
+        for table in Table_PDF.objects.filter(pdf_id=pdf_obj_id):
             tables_obj.append(table)
 
         print("--- Missing pages: None")
         
         return "", tables_obj
-            
 
     pages = []
+
     for page in page_list:
-        query = Table_PDF.objects.filter(pdf_id=pdf_obj_id, page=page)
         
-        if not query:
+        if not (query := Table_PDF.objects.filter(pdf_id=pdf_obj_id, page=page)):
             pages.append(str(page))
         else:
-            for table in query:
-                tables_obj.append(table)
+            tables_obj += [table for table in query]
 
     missing_pages = ",".join(pages)
-    print("--- Missing pages:", (missing_pages if missing_pages!="" else "None"))
+    print("--- Missing pages:", missing_pages or "None")
 
     return missing_pages, tables_obj
 

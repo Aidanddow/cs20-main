@@ -16,13 +16,16 @@ def extract(url, web_page, save_path=None):
 
     header = {'User-Agent': 'Mozilla/5.0'}
     session = requests.session()
+
     try:
         html = session.get(url, headers=header)
+    
     except requests.exceptions.ConnectionError as e:
         # Disable InsecureRequestWarning
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         # close SSL verify to solve SSL error. This gives a InsecureRequestWarning
         html = session.get(url, headers=header, verify=False)
+
     soup = BeautifulSoup(html.text,'lxml')
     
     # Get titles, and footnotes of tables
@@ -30,31 +33,26 @@ def extract(url, web_page, save_path=None):
     
     footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
     footnoteList = process_footnote(footnotes)
-
     
     # Get doi from url. If not found, try to find in the rest of page
-    web_page.doi = generics.extract_doi(url)
+    if not (doi := generics.extract_doi(url)):
+        doi = generics.extract_doi(soup.text)
 
-    if web_page.doi == "":
-        web_page.doi = generics.extract_doi(soup.text)
-
+    web_page.doi = doi
+    
     tableList = soup.find_all('table')
     
     for num, table in enumerate(tableList):
         print(f"--- Processing Table {num+1}")
         tableArray, formattedData = process_table(table)
 
-        if len(footnoteList) > num:
-            footnoteData = footnoteList[num]
-        else:
-            footnoteData = None
-
+        footnoteData = footnoteList[num] if len(footnoteList) > num else None
+    
         # If a title exists for this table, pass it
         title = None
 
         if len(titleList) > num:
-            if "Table" in titleList[num]:
-                title = titleList[num]
+            if "Table" in titleList[num]: title = titleList[num]
         
         write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
     
@@ -79,27 +77,21 @@ def process_table(table):
     dataList, formattedDataList  = [], []
     #headers = table.find_all("th")
 
-
-    theadNodes = table.find_all("thead")
     #loop through each tables thead tag
-    for thead in theadNodes:    
-        rows = thead.find_all("tr")
+    for thead in (theadNodes := table.find_all("thead")):    
 
         #loop through each row in the tables headings 
-        for row in rows:
+        for row in (rows := thead.find_all("tr")):
             #add space for each row for the row headings on the left side of the table
             tds = [""]
-            columns = row.find_all("th")
             
             #loop through each column heading for this row
-            for column in columns:
-                data = column.text
-                           
-                if "\n" in data:
+            for column in (columns := row.find_all("th")):
+                
+                if "\n" in (data := column.text):
                     data = data.replace("\n", " ")
 
-                if data != "":
-                    tds.append(data)
+                if data: tds.append(data)
 
                 #offest if the colspan is greater than 0
                 colspan = column.attrs.get("colspan", 0)
@@ -113,25 +105,19 @@ def process_table(table):
     # if headers:
     #     dataList.append([h.text for h in headers])
     
-    trNodes = table.find_all('tr')
-    
     # Get data from table
-    for tr in trNodes:
+    for tr in (trNodes := table.find_all('tr')):
         tds = []
         for td in tr.find_all('td'):
             # Remove link tag
-            link = td.find('a')
-            if link:
+            if (link := td.find('a')):
                 link.extract()
-            sup = td.find('sup')
-            if sup:
+
+            if (sup := td.find('sup')):
                 sup.extract()
+
             # Get the text for each cell, replacing empty strings with a dash
-            if td.text != "":
-                # Remove '\n' and more than one space
-                data = " ".join(td.text.split())
-            else:
-                data = "-"
+            data = "-" if td.text == "" else " ".join(td.text.split())
 
             #replace "," in text with "-" since "," messes with the creation of the csv
             # if "," in td.text:
@@ -140,7 +126,8 @@ def process_table(table):
             # data.replace("\n", "---")     
 
             tds.append(data)
-        if len(tds) != 0:
+
+        if len(tds) != 0: 
             dataList.append(tds)
     
     # Get data in bold and italics format
@@ -149,9 +136,7 @@ def process_table(table):
     italicsNode = table.find_all('i')
     italicsList = [i.text for i in italicsNode]
     boldList = [bold.text for bold in boldNodes1]
-
-    for bold in boldNodes2:
-        boldList.append(bold.text)
+    boldList += [bold.text for bold in boldNodes2]
     
     formattedDataList.append(boldList)
     formattedDataList.append(italicsList)
@@ -172,7 +157,7 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     font = xlwt.Font()
     
     # Write title into excel
-    if title:
+    if title: 
         sheet.write(0, 0, title)
     
     # Loop through arrays and write data into xls sheet
@@ -204,11 +189,10 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     # Save the file to "path/{num}.xls"
     fname = f"table{web_page.id}_{num+1}_{web_page.doi}.xls"
 
-    path = os.path.join(path, fname)
-    wbk.save(path)
+    wbk.save(path := os.path.join(path, fname))
 
     # Creates a new table entry every time a new file is saved
-    Table_HTML.objects.create(html_id=web_page, file_path = path)
+    Table_HTML.objects.create(html_id=web_page, file_path=path)
     
     print(f"--- Saved table {num+1} to {path}")
 

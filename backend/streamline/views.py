@@ -15,23 +15,9 @@ def get_tables_from_html(request):
     '''
     Extracts table data from HTML
     '''
-    # Get url and options
-    url = request.GET.get('url', None)
-    options = request.GET.get('options', None)
-
-    if not url:
-        print("\n--- No URL found")
-        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
-
-    print('url:', url)
-    print('options', options)
-
-    # Set up options list 
-    options_list = generics.get_options(options)
-
-    html_obj = Url_HTML.objects.filter(url=url).first()
+    url, options_list,_ = serve_request(request, get_pages=True)
         
-    if not html_obj:
+    if not (html_obj := Url_HTML.objects.filter(url=url).first()): 
         #store URL
         html_obj = Url_HTML.objects.create(url=url)
         print("--- New HTML URL ---", html_obj.url)
@@ -40,34 +26,40 @@ def get_tables_from_html(request):
         html_to_csv.extract(url, html_obj, save_path=CSV_PATH)
     
     # Query extracted tables
-    tables_obj = Table_HTML.objects.filter(html_id=html_obj.id)
     
-    if tables_obj:
+    if (tables_obj := Table_HTML.objects.filter(html_id=html_obj.id)):
         context_dict = generics.create_context(html_obj, tables_obj, table_type="html")
         return render(request, 'streamline/preview_page.html', context=context_dict)
-    
     else:
         return render(request, 'streamline/no_tables.html', context={})
 
+
+def serve_request(request, get_pages=False):
+    url = request.Get.get("url", None)
+    options = request.GET.get('options', None)
+    pages = request.GET.get("pages", None)
+
+    if not url:
+        print("\n--- No URL found")
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
+    
+    if get_pages and not pages:
+        print("--- No Pages found")
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
+
+    print('\nurl:', url)
+    print('options', options)
+    if get_pages: print('pages:', pages)
+    
+    options_list = generics.get_options(options)
+    return url, options_list, pages
+        
 
 def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
     '''
-    url = request.GET.get('url', None)
-    pages = request.GET.get('pages', None)
-    options = request.GET.get('options', None)
-
-    if not pages or not url:
-        print("\n--- No URL/Pages found")
-        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
-
-    print('\nurl:', url)
-    print('pages:', pages)
-    print('options', options)
-
-    #options - contains string of 01s to indicate true/falses 
-    options_list = generics.get_options(options)
+    url, options_list, pages = serve_request(request, get_pages=True)
 
     tables_obj = []
 
@@ -76,12 +68,10 @@ def get_tables_from_pdf(request):
 
         print("\n--- Valid input")
 
-        pdf_obj = Url_PDF.objects.filter(url=url).first()
-        
         page_list = pdf_to_csv.pages_to_int(pages)
 
         # If the pdf already exists in db
-        if pdf_obj:
+        if (pdf_obj := Url_PDF.objects.filter(url=url).first()):
             print("--- PDF Found ---", pdf_obj.url)
 
             pdf_path = pdf_obj.pdf_path
@@ -96,7 +86,7 @@ def get_tables_from_pdf(request):
             pdf_obj = Url_PDF.objects.create(url=url, pdf_path=pdf_path)
 
         #convert its table(s) into csv(s) and get table count
-        if pages != "":
+        if pages:
             new_tables = pdf_to_csv.download_pdf_tables(pdf_path, pdf_obj, save_path=CSV_PATH, pages=pages)
             tables_obj = tables_obj + new_tables
     
@@ -104,7 +94,7 @@ def get_tables_from_pdf(request):
         print("\n--- Invalid input")
         return HttpResponseBadRequest("<h1>Invalid Input</h1>")
 
-    if len(tables_obj) > 0:
+    if tables_obj:
         context_dict = generics.create_context(pdf_obj, tables_obj, table_type="pdf")
         return render(request, 'streamline/preview_page.html', context=context_dict)
 
@@ -117,21 +107,20 @@ def download_file(request, table_ids, table_type):
     A view to download either a zip of all tables, or a singular table
     table_id of 0 indicates the user wants all tables
     """
-
-    if table_ids == None or table_type == None:
+    if not table_ids or not table_type:
         print("\n--- Invalid Download request")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
-    table_paths = generics.get_filepaths_from_id(table_ids, table_type)
-
-    # Only one file is selected
-
-    if len(table_paths) == 0:
+    # No table paths are required
+    if not (table_paths := generics.get_filepaths_from_id(table_ids, table_type)):
         print("\n--- File(s) not found")
         return HttpResponseNotFound("<h1>File(s) not found</h1>")
 
-    if len(table_paths) == 1:
+    # Only one table path is required -> send as file
+    elif len(table_paths) == 1:
         file_path = table_paths[0]
+
+    # Multiple paths are required -> send as zip
     else:
         file_path = generics.create_zip(table_paths, folder=CSV_PATH)
 
