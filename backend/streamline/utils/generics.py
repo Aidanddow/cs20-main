@@ -31,7 +31,7 @@ def check_valid_page_input(pages):
     Ensures the input follows a valid format
     '''
     regex = "^all$|^\s*[0-9]+\s*((\,|\-)\s*[0-9]+)*\s*$"
-    return re.search(pages, regex)
+    return re.search(regex, pages)
 
 
 def extract_doi(text):

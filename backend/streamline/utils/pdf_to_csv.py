@@ -3,6 +3,7 @@ Download tables from pdf from terminal with
 
 % python download_pdf.py <filename>
 '''
+import uuid
 import camelot 
 import sys
 import os
@@ -19,9 +20,8 @@ def download_pdf(url, save_path=None):
     req = urllib.request.Request(url, headers=HEADERS)
     response = urllib.request.urlopen(req)
 
-    # Gets name of pdf file currently being viewed, decodes it
-    pdf_name = os.path.basename(url)
-    pdf_name = urllib.parse.unquote(pdf_name)
+    # Generates name of pdf file
+    pdf_name = str(uuid.uuid4())+".pdf"
 
     path = os.path.join(save_path, pdf_name)   
 

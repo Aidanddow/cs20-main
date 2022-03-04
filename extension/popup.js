@@ -32,19 +32,23 @@ function SaveOption2 (){
 }
 
 function loadOptions (){
-
-	console.log("check1");
-	console.log("check2");
-
 	
-	chrome.storage.local.get(["urlpass"], function(data){
-		document.getElementById("test").innerHTML = data.urlpass;
-	})
-	
-
 	chrome.storage.local.get(["Option1", "Option2"], function(data){
-		check1.checked = data.Option1;
-		check2.checked = data.Option2;
+
+		if (data.Option1 == 0){
+			check1.checked = false
+		}else{
+			check1.checked = true
+		}
+
+		if (data.Option2 == 0){
+			check2.checked = false
+		}else{
+			check2.checked = true
+		}
+
+		document.getElementById("test").innerHTML = data.Option1 + data.Option2
+		
 	});
 };
 
