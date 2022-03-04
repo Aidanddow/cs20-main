@@ -100,18 +100,6 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
         
         return "", tables_obj
 
-
-    if page_list == "all":
-        
-        print(f"--- Found {len(query)} tables")
-
-        for table in Table_PDF.objects.filter(pdf_id=pdf_obj_id):
-            tables_obj.append(table)
-
-        print("--- Missing pages: None")
-        
-        return "", tables_obj
-
     pages = []
 
     for page in page_list:
