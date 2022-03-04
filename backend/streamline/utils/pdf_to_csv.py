@@ -88,6 +88,18 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
     Check which tables are in the DB and return them as a list
     Also, returns the missing pages
     '''
+    if page_list == "all":
+        query = Table_PDF.objects.filter(pdf_id=pdf_obj_id)
+        
+        print(f"--- Found {len(query)} tables")
+
+        for table in query:
+            tables_obj.append(table)
+
+        print("--- Missing pages: None")
+        
+        return "", tables_obj
+
 
     if page_list == "all":
         

@@ -14,7 +14,12 @@ def get_tables_from_html(request):
     '''
     Extracts table data from HTML
     '''
-    url, options_list, _ = generics.serve_request(request, get_pages=True)
+    request_data = generics.get_data_from_request(request, get_pages=False)
+
+    if type(request_data) == HttpResponseBadRequest:
+        return request_data
+
+    url, options_list, _ = request_data
         
     if not (html_obj := Url_HTML.objects.filter(url=url).first()): 
         #store URL
@@ -37,8 +42,12 @@ def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
     '''
-    url, options_list, pages = generics.serve_request(request, get_pages=True)
+    request_data = generics.get_data_from_request(request, get_pages=True)
 
+    if type(request_data) == HttpResponseBadRequest:
+        return request_data
+
+    url, options_list, pages = request_data
     tables_obj = list()
 
     # Check if page input is valid

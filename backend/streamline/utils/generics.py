@@ -57,8 +57,8 @@ def get_filepaths_from_id(table_ids, table_type):
     '''
     model = Table_PDF if table_type == "pdf" else Table_HTML
     
-    table_list = [ (table_obj := model.objects.filter(id = int(id)).first())
-                    for id in table_ids.split(",") if table_obj ]
+    table_list = [ table_obj.file_path for id in table_ids.split(",")
+                    if (table_obj := model.objects.filter(id = int(id)).first()) ]
     
     return table_list
 
@@ -105,8 +105,13 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
 
     return context_dict
 
-def serve_request(request, get_pages=False):
-    url = request.Get.get("url", None)
+def get_data_from_request(request, get_pages=False):
+    '''
+    Takes a request, retrieves the url, options and optionally the pages
+    from the request. Handles errors in request.
+    This data is then printed and returned.
+    '''
+    url = request.GET.get("url", None)
     options = request.GET.get('options', None)
     pages = request.GET.get("pages", None)
 
@@ -120,9 +125,10 @@ def serve_request(request, get_pages=False):
 
     print('\nurl:', url)
     print('options', options)
+
     if get_pages: print('pages:', pages)
     
-    options_list = generics.get_options(options)
+    options_list = get_options(options)
     return url, options_list, pages
 
 
