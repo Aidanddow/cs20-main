@@ -30,7 +30,7 @@ def extract(url, web_page, save_path=None):
     
     # Get titles, and footnotes of tables
     titleList = [title.text for title in soup.select('header[class*="table"]')]
-    
+
     footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
     footnoteList = process_footnote(footnotes)
     
@@ -52,7 +52,7 @@ def extract(url, web_page, save_path=None):
         title = None
 
         if len(titleList) > num:
-            if "Table" in titleList[num]: title = titleList[num]
+            title = titleList[num] if "Table" in titleList[num] else None
         
         write_to_csv(tableArray, formattedData, footnoteData, num, web_page, title=title, path=save_path)
     
@@ -107,7 +107,8 @@ def process_table(table):
     
     # Get data from table
     for tr in (trNodes := table.find_all('tr')):
-        tds = []
+        tds = list()
+        
         for td in tr.find_all('td'):
             # Remove link tag
             if (link := td.find('a')):

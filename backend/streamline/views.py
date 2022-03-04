@@ -10,12 +10,11 @@ from .utils import html_to_csv, pdf_to_csv, generics
 CSV_PATH = settings.CSV_DIR
 PDF_PATH = settings.PDF_DIR
 
-
 def get_tables_from_html(request):
     '''
     Extracts table data from HTML
     '''
-    url, options_list,_ = serve_request(request, get_pages=True)
+    url, options_list, _ = generics.serve_request(request, get_pages=True)
         
     if not (html_obj := Url_HTML.objects.filter(url=url).first()): 
         #store URL
@@ -32,36 +31,15 @@ def get_tables_from_html(request):
         return render(request, 'streamline/preview_page.html', context=context_dict)
     else:
         return render(request, 'streamline/no_tables.html', context={})
-
-
-def serve_request(request, get_pages=False):
-    url = request.Get.get("url", None)
-    options = request.GET.get('options', None)
-    pages = request.GET.get("pages", None)
-
-    if not url:
-        print("\n--- No URL found")
-        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
-    
-    if get_pages and not pages:
-        print("--- No Pages found")
-        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
-
-    print('\nurl:', url)
-    print('options', options)
-    if get_pages: print('pages:', pages)
-    
-    options_list = generics.get_options(options)
-    return url, options_list, pages
         
 
 def get_tables_from_pdf(request):
     '''
     Extracts table data from PDF
     '''
-    url, options_list, pages = serve_request(request, get_pages=True)
+    url, options_list, pages = generics.serve_request(request, get_pages=True)
 
-    tables_obj = []
+    tables_obj = list()
 
     # Check if page input is valid
     if generics.check_valid_page_input(pages):

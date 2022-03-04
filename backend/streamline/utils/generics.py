@@ -3,7 +3,7 @@ import re
 import pandas as pd
 import mimetypes
 from zipfile import ZipFile
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.conf import settings
 from streamline.models import Table_PDF, Table_HTML
 
@@ -55,15 +55,12 @@ def get_filepaths_from_id(table_ids, table_type):
     '''
     Takes a list of table_ids and returns a list of each tables corresponding csv path
     '''
-    table_paths = []
-    table_model = Table_PDF if table_type == "pdf" else Table_HTML
+    model = Table_PDF if table_type == "pdf" else Table_HTML
     
-    for table_id in table_ids.split(","):
-        
-        if (table_obj := table_model.objects.filter(id = int(table_id)).first()):
-            table_paths.append(table_obj.file_path)
+    table_list = [ (table_obj := model.objects.filter(id = int(id)).first())
+                    for id in table_ids.split(",") if table_obj ]
     
-    return table_paths
+    return table_list
 
 
 def get_as_html(table):
@@ -108,24 +105,44 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
 
     return context_dict
 
+def serve_request(request, get_pages=False):
+    url = request.Get.get("url", None)
+    options = request.GET.get('options', None)
+    pages = request.GET.get("pages", None)
+
+    if not url:
+        print("\n--- No URL found")
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
+    
+    if get_pages and not pages:
+        print("--- No Pages found")
+        return HttpResponseBadRequest("<h1>Invalid Request</h1>")
+
+    print('\nurl:', url)
+    print('options', options)
+    if get_pages: print('pages:', pages)
+    
+    options_list = generics.get_options(options)
+    return url, options_list, pages
+
 
 def create_file_response(file_path):
     '''
     Creates a HttpResponse with a file attatched, and returns the response
     '''
-    print(f"--- Sending file {file_path} as HttpResponse")
-
-    # guess_type() returns a tuple (type, encoding) we disregard the encoding
-    mime_type, _ = mimetypes.guess_type(file_path)
-    fname = os.path.basename(file_path)
-
     if not os.path.isfile(file_path):
         print("--- File(s) cannot be downloaded")
         return HttpResponseNotFound("<h1>File(s) cannot be downloaded</h1>")
+
+    print(f"--- Sending file {file_path} as HttpResponse")
+
+    # The function guess_type() returns a tuple (type, encoding) we disregard the encoding
+    mime_type, _ = mimetypes.guess_type(file_path)
+
+    # Get the name of the file, disregarding the file path
+    fname = os.path.basename(file_path)
 
     with open(file_path, 'rb') as file:
         response = HttpResponse(file, content_type=mime_type)
         response['Content-Disposition'] = f'attachment; filename={fname}'
         return response
-
-    
