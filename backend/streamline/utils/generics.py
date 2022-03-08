@@ -7,13 +7,24 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadReque
 from django.conf import settings
 from streamline.models import Table_PDF, Table_HTML
 
-def get_options(options):
+def get_options(options_str):
     '''
     Receives a string of 1's and 0's corresponding to different user settings
     enable_footnotes = options_list[0]
     force_reprocess = options_list[1]
     ''' 
-    return [int(char) if char.isdigit() else 1 for char in options] if options else [1, 0]
+    # Default options
+    options =  { "enable_footnotes": True,
+                 "force_reprocess" : False, }
+
+    if options_str:
+        options_list = [False if char.isdigit() else True for char in options_str]
+        
+        options["enable_footnotes"] = options_list[0]
+        options["force_reprocess"] = options_list[1]
+
+    return options
+    
 
 
 def create_zip(paths, folder=settings.CSV_DIR, zipPath="tables.zip"):
@@ -130,8 +141,8 @@ def get_data_from_request(request, get_pages=False):
 
     if get_pages: print('pages:', pages)
     
-    options_list = get_options(options)
-    return url, options_list, pages
+    options_dict = get_options(options)
+    return url, options_dict, pages
 
 
 def create_file_response(file_path):

@@ -19,16 +19,16 @@ def get_tables_from_html(request):
     if type(request_data) == HttpResponseBadRequest:
         return request_data
 
-    url, options_list, _ = request_data
+    url, options, _ = request_data
         
-    #if not in database or reprocess is on 
-    if not (html_obj := Url_HTML.objects.filter(url=url).first()) or options_list[1] == 1: 
+    # If not in database or reprocess is on 
+    if not (html_obj := Url_HTML.objects.filter(url=url).first()) or options["force_reprocess"]: 
         #store URL
         html_obj = Url_HTML.objects.create(url=url)
         print("--- New HTML URL ---", html_obj.url)
 
         #process page
-        html_to_csv.extract(url, html_obj, options_list[0], save_path=CSV_PATH)
+        html_to_csv.extract(url, html_obj, options, save_path=CSV_PATH)
     
     # Query extracted tables
     
@@ -48,7 +48,7 @@ def get_tables_from_pdf(request):
     if type(request_data) == HttpResponseBadRequest:
         return request_data
 
-    url, options_list, pages = request_data
+    url, options, pages = request_data
     tables_obj = list()
 
     # Check if page input is valid
@@ -58,8 +58,8 @@ def get_tables_from_pdf(request):
 
         page_list = pdf_to_csv.pages_to_int(pages)
 
-        # If the pdf already exists in db
-        if (pdf_obj := Url_PDF.objects.filter(url=url).first()) or options_list[1] == 1:
+        # If the pdf already exists in db or force reprocess is on
+        if (pdf_obj := Url_PDF.objects.filter(url=url).first()) or options["force_reprocess"]:
             print("--- PDF Found ---", pdf_obj.url)
 
             pdf_path = pdf_obj.pdf_path

@@ -7,7 +7,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from streamline.models import Table_HTML
 from . import generics
 
-def extract(url, web_page, enable_footnotes=1, save_path=None):
+def extract(url, web_page, options, save_path=None):
     '''
     Takes a url, finds all html tables and processes them,
     saving their data to xls files.
