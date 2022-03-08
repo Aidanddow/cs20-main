@@ -21,10 +21,10 @@ chrome.contextMenus.onClicked.addListener( (info,tab) => {
 		var url = tabs[0].url;
 
 		// get options 
-		chrome.storage.local.get(["Option1", "Option2"], function(data){
-		var check1 = data.Option1;
-		var check2 = data.Option2;
-		let options = check1 + check2
+		chrome.storage.local.get(["enable_footnotes", "force_reprocess"], function(data){
+		var enable_footnotes = data.enable_footnotes;
+		var force_reprocess = data.force_reprocess;
+		let options = enable_footnotes + force_reprocess
 		
 
 			//debug info

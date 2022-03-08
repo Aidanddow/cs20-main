@@ -10,6 +10,8 @@ from streamline.models import Table_PDF, Table_HTML
 def get_options(options):
     '''
     Receives a string of 1's and 0's corresponding to different user settings
+    enable_footnotes = options_list[0]
+    force_reprocess = options_list[1]
     ''' 
     return [int(char) if char.isdigit() else 1 for char in options] if options else []
 

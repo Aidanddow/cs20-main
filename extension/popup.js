@@ -1,54 +1,45 @@
 // Option1 = Enable Preview
-check1 = document.getElementById("option1");
-check2 = document.getElementById("option2");
+enable_footnotes = document.getElementById("enable_footnotes");
+force_reprocess = document.getElementById("force_reprocess");
 
-check1.addEventListener("click", SaveOption1);
-check2.addEventListener("click", SaveOption2);
+enable_footnotes.addEventListener("click", save_enable_footnotes);
+force_reprocess.addEventListener("click", save_force_reprocess);
 
-console.log(check1);
-console.log(check2);
 
-function SaveOption1 (){
-	if (check1.checked){
-		chrome.storage.local.set({"Option1" : '1'}, function(){});
-		console.log(0)
+function save_enable_footnotes (){
+	if (enable_footnotes.checked){
+		chrome.storage.local.set({"enable_footnotes" : '1'}, function(){});
 	}
 	else {
-		chrome.storage.local.set({"Option1" : '0'}, function(){});
-		console.log(1)
+		chrome.storage.local.set({"enable_footnotes" : '0'}, function(){});
 	}
 }
 
-function SaveOption2 (){
-
-	if (check1.checked){
-		chrome.storage.local.set({"Option2" : '1'}, function(){});
-		console.log(0)
+function save_force_reprocess (){
+	if (force_reprocess.checked){
+		chrome.storage.local.set({"force_reprocess" : '1'}, function(){});
 	}
 	else {
-		chrome.storage.local.set({"Option2" : '0'}, function(){});
-		console.log(1)	
+		chrome.storage.local.set({"force_reprocess" : '0'}, function(){});
+
 	}
 }
 
 function loadOptions (){
 	
-	chrome.storage.local.get(["Option1", "Option2"], function(data){
+	chrome.storage.local.get(["enable_footnotes", "force_reprocess"], function(data){
 
-		if (data.Option1 == 0){
-			check1.checked = false
+		if (data.enable_footnotes == 0){
+			enable_footnotes.checked = false
 		}else{
-			check1.checked = true
+			enable_footnotes.checked = true
 		}
 
-		if (data.Option2 == 0){
-			check2.checked = false
+		if (data.force_reprocess == 0){
+			force_reprocess.checked = false
 		}else{
-			check2.checked = true
-		}
-
-		document.getElementById("test").innerHTML = data.Option1 + data.Option2
-		
+			force_reprocess.checked = true
+		}		
 	});
 };
 

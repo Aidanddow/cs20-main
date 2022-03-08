@@ -8,31 +8,29 @@
             overflow: hidden;
             background-color: #F67571;}
 
-            div {text-align: center;}
+            #header {text-align: center;}
       </style>
   </head>
   <body>
 
-    <div>
-
+    <div id="header">
       <img src="Steamline Tables-logos-crop.jpeg" alt="Logo" style="width:200px;" >
       <hr>
     </div>  
     
-    <div>
+    <div id="header">
       <p><strong>Welcome to streamline table, Simply right click on a PDF or HTML table and click Streamline</strong></p>
-      <input type="checkbox" id="option1" name="option1" value="1">
-      <label for="option1">Enable Preview</label>
     </div>
 
     <div>
-      <input type="checkbox" id="option2" name="option2" value="2">
-      <label for="option2">Unknown Option 2</label>
+      <input type="checkbox" id="enable_footnotes" name="enable_footnotes" value="1">
+      <label for="enable_footnotes">Enable Preview</label>
     </div>
 
-    <!-- <div>
-      <p id="test"></p>
-    </div> -->
+    <div>
+      <input type="checkbox" id="force_reprocess" name="force_reprocess" value="2">
+      <label for="force_reprocess">Force Reprocess</label>
+    </div>
 
     <script src="popup.js" charset="utf-8"></script>
 

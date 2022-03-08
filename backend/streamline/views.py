@@ -21,13 +21,14 @@ def get_tables_from_html(request):
 
     url, options_list, _ = request_data
         
-    if not (html_obj := Url_HTML.objects.filter(url=url).first()): 
+    #if not in database or reprocess is on 
+    if not (html_obj := Url_HTML.objects.filter(url=url).first()) or options_list[1] == 1: 
         #store URL
         html_obj = Url_HTML.objects.create(url=url)
         print("--- New HTML URL ---", html_obj.url)
 
         #process page
-        html_to_csv.extract(url, html_obj, save_path=CSV_PATH)
+        html_to_csv.extract(url, html_obj, options_list[0], save_path=CSV_PATH)
     
     # Query extracted tables
     
@@ -58,7 +59,7 @@ def get_tables_from_pdf(request):
         page_list = pdf_to_csv.pages_to_int(pages)
 
         # If the pdf already exists in db
-        if (pdf_obj := Url_PDF.objects.filter(url=url).first()):
+        if (pdf_obj := Url_PDF.objects.filter(url=url).first()) or options_list[1] == 1:
             print("--- PDF Found ---", pdf_obj.url)
 
             pdf_path = pdf_obj.pdf_path
