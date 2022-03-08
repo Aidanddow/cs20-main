@@ -13,7 +13,7 @@ def get_options(options):
     enable_footnotes = options_list[0]
     force_reprocess = options_list[1]
     ''' 
-    return [int(char) if char.isdigit() else 1 for char in options] if options else []
+    return [int(char) if char.isdigit() else 1 for char in options] if options else [1, 0]
 
 
 def create_zip(paths, folder=settings.CSV_DIR, zipPath="tables.zip"):
