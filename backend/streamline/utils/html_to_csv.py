@@ -19,12 +19,14 @@ def extract(url, web_page, options, save_path=None):
 
     try:
         html = session.get(url, headers=header)
-    
+        html.raise_for_status()
     except requests.exceptions.ConnectionError as e:
         # Disable InsecureRequestWarning
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         # close SSL verify to solve SSL error. This gives a InsecureRequestWarning
         html = session.get(url, headers=header, verify=False)
+    except requests.exceptions.HTTPError:
+        return 0
 
     soup = BeautifulSoup(html.text,'lxml')
     
@@ -32,7 +34,7 @@ def extract(url, web_page, options, save_path=None):
     titleList = [title.text for title in soup.select('header[class*="table"]')]
 
     footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
-    footnoteList = process_footnote(footnotes)
+    footnoteList = process_footnote(footnotes) if (enable_footnotes == 1) else list()
     
     # Get doi from url. If not found, try to find in the rest of page
     if not (doi := generics.extract_doi(url)):
@@ -74,7 +76,7 @@ def process_table(table):
     '''
     Takes a html table element and generates an array corresponding to the row and column data
     '''
-    dataList, formattedDataList  = [], []
+    dataList, formattedDataList  = list(), list()
     #headers = table.find_all("th")
 
     #loop through each tables thead tag
