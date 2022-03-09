@@ -25,6 +25,8 @@ def extract(url, web_page, enable_footnotes=1, save_path=None):
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         # close SSL verify to solve SSL error. This gives a InsecureRequestWarning
         html = session.get(url, headers=header, verify=False)
+    except requests.exceptions.HTTPError:
+        return 0
 
     soup = BeautifulSoup(html.text,'lxml')
     
