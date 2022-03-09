@@ -34,7 +34,10 @@ def extract(url, web_page, options, save_path=None):
     titleList = [title.text for title in soup.select('header[class*="table"]')]
 
     footnotes = [footnote for footnote in soup.select('div[class*="footnote"]')]
-    footnoteList = process_footnote(footnotes) if (enable_footnotes == 1) else list()
+    footnoteList = list()
+
+    if options["enable_footnotes"]:
+        footnoteList = process_footnote(footnotes)
     
     # Get doi from url. If not found, try to find in the rest of page
     if not (doi := generics.extract_doi(url)):
