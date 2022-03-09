@@ -21,11 +21,13 @@ def extract(url, web_page, options, save_path=None):
         html = session.get(url, headers=header)
         html.raise_for_status()
     except requests.exceptions.ConnectionError as e:
+        print(e)
         # Disable InsecureRequestWarning
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         # close SSL verify to solve SSL error. This gives a InsecureRequestWarning
         html = session.get(url, headers=header, verify=False)
-    except requests.exceptions.HTTPError:
+    except requests.exceptions.HTTPError as e:
+        print(e)
         return 0
 
     soup = BeautifulSoup(html.text,'lxml')

@@ -17,7 +17,8 @@ def get_tables_from_html(request):
     request_data = generics.get_data_from_request(request, get_pages=False)
 
     if type(request_data) == HttpResponseBadRequest:
-        return request_data
+        raise request_data
+        return
 
     url, options, _ = request_data
         
