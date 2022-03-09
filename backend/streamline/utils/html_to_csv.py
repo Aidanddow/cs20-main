@@ -19,7 +19,7 @@ def extract(url, web_page, enable_footnotes=1, save_path=None):
 
     try:
         html = session.get(url, headers=header)
-    
+        html.raise_for_status()
     except requests.exceptions.ConnectionError as e:
         # Disable InsecureRequestWarning
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
