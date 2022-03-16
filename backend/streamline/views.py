@@ -21,7 +21,7 @@ def get_tables_from_html(request):
         
 
     url, options, _ = request_data
-        
+    
     # If not in database or reprocess is on 
     if not (html_obj := Url_HTML.objects.filter(url=url).first()) or options["force_reprocess"]: 
         #store URL
