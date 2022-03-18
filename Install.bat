@@ -1,0 +1,1 @@
+start cmd /k "cd backend && venv\Scripts\activate.bat && pip install -r requirements.txt"
