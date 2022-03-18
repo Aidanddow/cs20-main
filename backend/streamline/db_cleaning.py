@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.conf import settings
 from .models import Url_PDF, Url_HTML
 
+
 def remove_record(table, type):
 
     # Code from @David Robinson at https://stackoverflow.com/questions/10345147/django-query-datetime-for-objects-older-than-5-hours
@@ -17,17 +18,19 @@ def remove_record(table, type):
 
     results = table.objects.filter(created__lt=time_threshold)
 
-    if(results):
+    if results:
         for result in results:
             result.delete()
-        
-        print("---",len(results),type,"_TUPLE DELETED --- ")
+
+        print("---", len(results), type, "_TUPLE DELETED --- ")
+
 
 def clean_db():
     print("--- Scheduled Database Cleaning")
 
     remove_record(Url_PDF, "PDF")
     remove_record(Url_HTML, "HTML")
+
 
 def run_continuously(self, interval=1):
     """Continuously run, while executing pending jobs at each elapsed
@@ -44,7 +47,6 @@ def run_continuously(self, interval=1):
     cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):
-
         @classmethod
         def run(cls):
             while not cease_continuous_run.is_set():
@@ -56,10 +58,16 @@ def run_continuously(self, interval=1):
     continuous_thread.start()
     return cease_continuous_run
 
+
 Scheduler.run_continuously = run_continuously
 
+
 def start_scheduler():
-    print("--- Cleaning Scheduler Running (every {n_hours} hours)".format(n_hours = settings.CLEANING_INTERVAL))
+    print(
+        "--- Cleaning Scheduler Running (every {n_hours} hours)".format(
+            n_hours=settings.CLEANING_INTERVAL
+        )
+    )
     scheduler = Scheduler()
     scheduler.every(settings.CLEANING_INTERVAL).hours.do(clean_db)
     scheduler.run_continuously()

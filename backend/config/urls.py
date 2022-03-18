@@ -20,6 +20,6 @@ from streamline import views
 
 
 urlpatterns = [
-    path('streamline/', include('streamline.urls')),
-    path('admin/', admin.site.urls),
+    path("streamline/", include("streamline.urls")),
+    path("admin/", admin.site.urls),
 ]
