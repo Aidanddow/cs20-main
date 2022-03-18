@@ -141,3 +141,8 @@ USE_TZ = True
 
 MEDIA_URL = '/media/'
 CSV_URL = '/csv/'
+STATIC_URL = '/static/'
+# STATICFILES_DIRS = (
+#     os.path.join(BASE_DIR, "static/"),
+# )
+
