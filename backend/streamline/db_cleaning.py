@@ -1,13 +1,14 @@
 # Code from https://stackoverflow.com/questions/44896618/django-run-a-function-every-x-seconds/60244694#60244694
 
-from schedule import Scheduler
 import threading
 import time
 from datetime import timedelta
-from django.utils.timezone import now
 
 from django.conf import settings
-from .models import Url_PDF, Url_HTML
+from django.utils.timezone import now
+from schedule import Scheduler
+
+from .models import Url_HTML, Url_PDF
 
 
 def remove_record(table, type):

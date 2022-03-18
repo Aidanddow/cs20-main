@@ -1,11 +1,15 @@
+import mimetypes
 import os
 import re
-import pandas as pd
-import mimetypes
 from zipfile import ZipFile
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+
+import pandas as pd
 from django.conf import settings
-from streamline.models import Table_PDF, Table_HTML
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseNotFound)
+
+from streamline.models import Table_HTML, Table_PDF
+
 
 def get_options(options_str):
     '''

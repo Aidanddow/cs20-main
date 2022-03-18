@@ -1,10 +1,11 @@
 # code
+import os
+
+from django.conf import settings
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from .models import Table_HTML, Url_PDF, Table_PDF
 
-import os
-from django.conf import settings
+from .models import Table_HTML, Table_PDF, Url_PDF
 
 PDF_PATH = settings.PDF_DIR
 CSV_PATH = settings.CSV_DIR

@@ -1,11 +1,16 @@
-import sys, os
-import xlwt
+import os
+import sys
 from pathlib import Path
-from bs4 import BeautifulSoup
+
 import requests
+import xlwt
+from bs4 import BeautifulSoup
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 from streamline.models import Table_HTML
+
 from . import generics
+
 
 def extract(url, web_page, options, save_path=None):
     '''

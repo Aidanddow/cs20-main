@@ -1,7 +1,7 @@
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
-from django.http import HttpResponseNotFound
-from streamline.models import Url_PDF, Table_PDF, Url_HTML, Table_HTML
+
+from streamline.models import Table_HTML, Table_PDF, Url_HTML, Url_PDF
 
 
 class TestTablesFromPdf(TestCase):

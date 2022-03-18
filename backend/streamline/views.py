@@ -1,10 +1,10 @@
-import re
-from django.http import HttpResponseNotFound, HttpResponseBadRequest
-from django.shortcuts import render
-from streamline.models import Url_PDF, Url_HTML, Table_PDF, Table_HTML
 from django.conf import settings
+from django.http import HttpResponseBadRequest, HttpResponseNotFound
+from django.shortcuts import render
 
-from .utils import html_to_csv, pdf_to_csv, generics
+from streamline.models import Table_HTML, Url_HTML, Url_PDF
+
+from .utils import generics, html_to_csv, pdf_to_csv
 
 # Path to which resulting csv files will be saved (will be .../cs20-main/backend/saved)
 CSV_PATH = settings.CSV_DIR
