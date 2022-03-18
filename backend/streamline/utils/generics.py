@@ -114,10 +114,16 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
     Creates and returns a dictionary providing context to the webpage
     """
     table_ids = ",".join([str(table.id) for table in tables_obj])
-    tables_html = [
-        (str(i + 1), get_as_html(tables_obj[i]), str(tables_obj[i].page))
-        for i in range(len(tables_obj))
-    ]
+    tables_html = []
+    if table_type == "pdf":
+        tables_html = [
+            (str(i + 1), get_as_html(tables_obj[i]), str(tables_obj[i].page))
+            for i in range(len(tables_obj))
+        ]
+    else:
+        tables_html = [
+            (str(i + 1), get_as_html(tables_obj[i])) for i in range(len(tables_obj))
+        ]
 
     context_dict = {
         "url_id": url_obj.id,
@@ -148,7 +154,9 @@ def get_data_from_request(request, get_pages=False):
         print("--- No Pages found")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
-    options_dict = get_options(options)
+    options_dict = {}
+    if options:
+        options_dict = get_options(options)
 
     print(f"\n--- Url: {url}")
     print(f"--- Options: {options_dict}")

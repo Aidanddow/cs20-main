@@ -26,7 +26,7 @@ def get_tables_from_html(request):
     html_obj = Url_HTML.objects.filter(url=url).first()
 
     # If not in database or reprocess is on
-    if not html_obj or options["force_reprocess"]:
+    if not html_obj and not "force_reprocess" in options.keys():
         # store URL
         html_obj = Url_HTML.objects.create(url=url)
         print("--- New HTML URL:", html_obj.url)
@@ -60,8 +60,9 @@ def get_tables_from_pdf(request):
         page_list = pdf_to_csv.pages_to_int(pages)
 
         pdf_obj = Url_PDF.objects.filter(url=url).first()
-        # If the pdf already exists in db or force reprocess is on
-        if pdf_obj and not options["force_reprocess"]:
+
+        # If the pdf already exists in db or force reprocess is off
+        if pdf_obj and not "force_reprocess" in options.keys():
             print("--- PDF Found ---", pdf_obj.url)
             pdf_path = pdf_obj.pdf_path
 
