@@ -10,25 +10,18 @@ from streamline.models import Table_PDF, Table_HTML
 def get_options(options_str):
     '''
     Receives a string of 1's and 0's corresponding to different user settings
-    enable_footnotes = options_list[0]
-    force_reprocess = options_list[1]
+    1 = True, 0 = False
+    
+    options_list[0]: "Enable Footnotes"
+    options_list[1]: "Force Reprocess"
     ''' 
-    # Default options
-    options =  { "enable_footnotes": True,
-                 "force_reprocess" : False, }
 
-    options_list = []
-    for char in options_str:
-        if char == "1":
-            options_list.append(True)
-        else:
-            options_list.append(False)
+    options_list = [True if char=="1" else False for char in options_str]
 
-    print(options_list)
+    options =  { "enable_footnotes": options_list[0],
+                 "force_reprocess" : options_list[1] }
 
-    options["enable_footnotes"] = options_list[0]
-    options["force_reprocess"] = options_list[1]
-
+    print(f"Options: {options}")
     return options
     
 
