@@ -1,12 +1,24 @@
 image: python:3.9
 
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip3 install -r backend/requirements.txt
+    - pip3 install opencv-python-headless  
+
 django_tests:
     tags:
         - docker
     script:
-        - pip3 install -r backend/requirements.txt
-        - pip3 install opencv-python-headless
-
         - python3 backend/manage.py makemigrations
         - python3 backend/manage.py migrate
         - python3 backend/manage.py check
@@ -14,4 +26,6 @@ django_tests:
         - python3 backend/manage.py test backend/
     only:
         - developer 
+
+
 
