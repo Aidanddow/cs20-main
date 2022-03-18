@@ -117,12 +117,3 @@ def get_missing_pages(page_list, pdf_obj_id, tables_obj):
 
     return missing_pages, tables_obj
 
-# Temporary main method to download pdf tables from terminal
-if __name__ == "__main__":
-    try:
-        pdf = sys.argv[1]
-        download_pdf_tables(pdf)
-    except IndexError as e:
-        print(e, "No pdf file provided")
-    except Exception as e:
-        print("Error", e)

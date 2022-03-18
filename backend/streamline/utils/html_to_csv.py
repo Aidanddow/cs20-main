@@ -93,12 +93,12 @@ def process_table(table):
     for thead in (theadNodes := table.find_all("thead")):    
 
         #loop through each row in the tables headings 
-        for row in (rows := thead.find_all("tr")):
+        for row in thead.find_all("tr"):
             #add space for each row for the row headings on the left side of the table
             tds = [""]
             
             #loop through each column heading for this row
-            for column in (columns := row.find_all("th")):
+            for column in row.find_all("th"):
                 
                 if "\n" in (data := column.text):
                     data = data.replace("\n", " ")
@@ -199,16 +199,3 @@ def write_to_csv(table, formattedData, footnoteData, num, web_page, title=None, 
     Table_HTML.objects.create(html_id=web_page, file_path=path)
     
     print(f"--- Saved table {num+1} to {path}")
-
-
-if __name__ == '__main__':
-    try:
-        url = sys.argv[1]
-        #url = "https://dom-pubs.onlinelibrary.wiley.com/doi/10.1111/dom.12903"
-        doi = generics.extract_doi(url)
-
-        CSV_PATH = os.path.join(Path.home(), "Desktop")
-        extract(url, web_page=0, save_path=CSV_PATH)
-
-    except Exception as e:
-        print('--- Error', e)
