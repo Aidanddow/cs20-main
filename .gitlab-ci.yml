@@ -8,16 +8,17 @@ cache:
     - .cache/pip
     - venv/
 
-django_tests:
-    before_script:
-        - echo "Setting up venv"
-        - pip install virtualenv
-        - virtualenv venv
-        - source venv/bin/activate
-        - echo "Installing requirements"
-        - pip3 install -r backend/requirements.txt
-        - pip3 install opencv-python-headless  
+before_script:
+    - echo "Setting up venv"
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - echo "Installing requirements"
+    - pip3 install -r backend/requirements.txt
+    - pip3 install opencv-python-headless  
 
+django_tests:
+    stage: test
     tags:
         - docker
     script:
@@ -30,6 +31,15 @@ django_tests:
         - python3 backend/manage.py test backend/
     only:
         - developer 
+
+black:
+    stage: test
+    image: registry.gitlab.com/pipeline-components/black:latest
+    script:
+    - black --check --verbose -- .
+    only:
+        - developer
+
 
 
 
