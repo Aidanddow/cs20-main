@@ -19,8 +19,8 @@ Load Chrome extension in Chrome by going to Settings->Extensions->Load Unpacked,
 
 ### Automatically
 
-The First time you download the file run the Install.bat file - this will install all the python packages for the backend
-Then When you want to run the Streamline Table run the Start.bat file - While the terminal is running you will be able to use the extension freely 
+The First time you download the file run the Install.bat file - this will install all the python packages for the backend.
+Then When you want to run the Streamline Table run the Start.bat file - While the terminal is running you will be able to use the extension freely. 
 
 ### Manually 
 Setup the django models from the backend folder with
