@@ -22,11 +22,11 @@ def get_tables_from_html(request):
 
     url, options, _ = request_data
 
+    # Try to find tables in database
+    html_obj = Url_HTML.objects.filter(url=url).first()
+
     # If not in database or reprocess is on
-    if (
-        not (html_obj := Url_HTML.objects.filter(url=url).first())
-        or options["force_reprocess"]
-    ):
+    if not html_obj or options["force_reprocess"]:
         # store URL
         html_obj = Url_HTML.objects.create(url=url)
         print("--- New HTML URL ---", html_obj.url)
@@ -62,12 +62,10 @@ def get_tables_from_pdf(request):
 
         page_list = pdf_to_csv.pages_to_int(pages)
 
+        pdf_obj = Url_PDF.objects.filter(url=url).first()
         # If the pdf already exists in db or force reprocess is on
-        if (pdf_obj := Url_PDF.objects.filter(url=url).first()) or options[
-            "force_reprocess"
-        ]:
+        if pdf_obj or options["force_reprocess"]:
             print("--- PDF Found ---", pdf_obj.url)
-
             pdf_path = pdf_obj.pdf_path
 
             pages, tables_obj = pdf_to_csv.get_missing_pages(
@@ -86,7 +84,7 @@ def get_tables_from_pdf(request):
             new_tables = pdf_to_csv.download_pdf_tables(
                 pdf_path, pdf_obj, save_path=CSV_PATH, pages=pages
             )
-            tables_obj = tables_obj + new_tables
+            tables_obj += new_tables
 
     else:
         print("\n--- Invalid input")
