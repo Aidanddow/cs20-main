@@ -30,7 +30,7 @@ Then run the django webapp with
 
 ## Run Instructions
 
-Download folder containing extension (extension)
+Download the folder extension,
 Go to chrome://extensions
 Enable Developer Mode in top right
 Select load unpacked in top left
