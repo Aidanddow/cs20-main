@@ -1,1 +1,1 @@
-start cmd /k "cd backend && venv\Scripts\activate.bat && pip install -r requirements.txt"
+start cmd /k "cd backend && python -m venv venv && venv\Scripts\activate.bat && pip install -r requirements.txt"
