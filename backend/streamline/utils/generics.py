@@ -29,7 +29,6 @@ def get_options(options_str):
     return options
     
 
-
 def create_zip(paths, folder=settings.CSV_DIR, zipPath="tables.zip"):
     '''
     Will create and return the path to a zip file of all csv files in folder
@@ -53,6 +52,7 @@ def check_valid_page_input(pages):
 def extract_doi(text):
     '''
     Should extract the doi if it is present from either a url, or html body
+
     Regex found at: https://www.crossref.org/blog/dois-and-matching-regular-expressions/
     https://stackoverflow.com/questions/27910/finding-a-doi-in-a-document-or-page
     '''
@@ -63,7 +63,7 @@ def extract_doi(text):
     else:
         doi = ""
 
-    print(f"doi = {doi}")
+    print(f"doi = {doi}" if doi else "DOI not found")
     return doi.replace("/","_")
 
 
@@ -121,6 +121,7 @@ def create_context(url_obj, tables_obj, table_type="pdf"):
 
     return context_dict
 
+
 def get_data_from_request(request, get_pages=False):
     '''
     Takes a request, retrieves the url, options and optionally the pages
@@ -138,13 +139,13 @@ def get_data_from_request(request, get_pages=False):
     if get_pages and not pages:
         print("--- No Pages found")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
-
-    print('\nurl:', url)
-    print('options', options)
-
-    if get_pages: print('pages:', pages)
     
     options_dict = get_options(options)
+
+    print(f"\nUrl: {url}")
+    print(f"Options: {options_dict}")
+    print(f"Pages: {pages}" if get_pages else "")
+
     return url, options_dict, pages
 
 
