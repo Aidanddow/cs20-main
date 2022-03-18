@@ -109,9 +109,6 @@ def process_table(table):
             if len(tds) != 0:
                 dataList.append(tds)
     
-    # if headers:
-    #     dataList.append([h.text for h in headers])
-    
     # Get data from table
     for tr in (trNodes := table.find_all('tr')):
         tds = list()
@@ -126,12 +123,6 @@ def process_table(table):
 
             # Get the text for each cell, replacing empty strings with a dash
             data = "-" if td.text == "" else " ".join(td.text.split())
-
-            #replace "," in text with "-" since "," messes with the creation of the csv
-            # if "," in td.text:
-            #     data = td.text.replace(",", "-") 
-
-            # data.replace("\n", "---")     
 
             tds.append(data)
 
