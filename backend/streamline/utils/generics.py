@@ -25,7 +25,6 @@ def get_options(options_str):
     options =  { "enable_footnotes": options_list[0],
                  "force_reprocess" : options_list[1] }
 
-    print(f"Options: {options}")
     return options
     
 
@@ -84,7 +83,6 @@ def get_as_html(table):
     Returns a html representation of a table, or an error message if table couldn't be read
     '''
     try:
-        print("\nfilepath: ",table.file_path)
         
         if table.file_path.endswith(".csv"):
             df_xls = pd.read_csv(table.file_path, index_col=False, skip_blank_lines=True)
@@ -142,9 +140,9 @@ def get_data_from_request(request, get_pages=False):
     
     options_dict = get_options(options)
 
-    print(f"\nUrl: {url}")
-    print(f"Options: {options_dict}")
-    print(f"Pages: {pages}" if get_pages else "")
+    print(f"\n--- Url: {url}")
+    print(f"--- Options: {options_dict}")
+    print(f"--- Pages: {pages}" if get_pages else "")
 
     return url, options_dict, pages
 

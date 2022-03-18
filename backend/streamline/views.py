@@ -29,7 +29,7 @@ def get_tables_from_html(request):
     if not html_obj or options["force_reprocess"]:
         # store URL
         html_obj = Url_HTML.objects.create(url=url)
-        print("--- New HTML URL ---", html_obj.url)
+        print("--- New HTML URL:", html_obj.url)
 
         # process page
         html_to_csv.extract(url, html_obj, options, save_path=CSV_PATH)
@@ -57,15 +57,12 @@ def get_tables_from_pdf(request):
 
     # Check if page input is valid
     if generics.check_valid_page_input(pages):
-
-        print("\n--- Valid input")
-
         page_list = pdf_to_csv.pages_to_int(pages)
 
         pdf_obj = Url_PDF.objects.filter(url=url).first()
         # If the pdf already exists in db or force reprocess is on
         if pdf_obj or options["force_reprocess"]:
-            print("--- PDF Found ---", pdf_obj.url)
+            print("\n--- PDF Found:", pdf_obj.url)
             pdf_path = pdf_obj.pdf_path
 
             pages, tables_obj = pdf_to_csv.get_missing_pages(
@@ -73,7 +70,7 @@ def get_tables_from_pdf(request):
             )
 
         else:
-            print("--- New PDF ---", url)
+            print("--- New PDF:", url)
             # downloads pdf from right click
             pdf_path = pdf_to_csv.download_pdf(url, save_path=PDF_PATH)
             # store URL
@@ -87,7 +84,7 @@ def get_tables_from_pdf(request):
             tables_obj += new_tables
 
     else:
-        print("\n--- Invalid input")
+        print("\n--- Invalid page input")
         return HttpResponseBadRequest("<h1>Invalid Input</h1>")
 
     if tables_obj:
@@ -118,6 +115,7 @@ def download_file(request, table_ids, table_type):
 
     # Multiple paths are required -> send as zip
     else:
+        print("--- Sending tables as zip")
         file_path = generics.create_zip(table_paths, folder=CSV_PATH)
 
     return generics.create_file_response(file_path)
