@@ -21,6 +21,8 @@ django_tests:
 
 black:
     stage: linting
+    tags:
+        - docker
     image: registry.gitlab.com/pipeline-components/black:latest
     script:
         - black --check --verbose -- .
