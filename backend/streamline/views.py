@@ -64,7 +64,7 @@ def get_tables_from_pdf(request):
 
         pdf_obj = Url_PDF.objects.filter(url=url).first()
         # If the pdf already exists in db or force reprocess is on
-        if pdf_obj or options["force_reprocess"]:
+        if pdf_obj and not options["force_reprocess"]:
             print("--- PDF Found ---", pdf_obj.url)
             pdf_path = pdf_obj.pdf_path
 
