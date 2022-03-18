@@ -1,8 +1,8 @@
-image: python:3.9
-
 django_tests:
+    stage: test
     tags:
         - docker
+    image: python:3.9
     script:
         - pip3 install -r backend/requirements.txt
         - pip3 install opencv-python-headless
@@ -12,6 +12,16 @@ django_tests:
         - python3 backend/manage.py check
 
         - python3 backend/manage.py test backend/
-    
     only:
         - developer 
+
+stages:
+    - linting
+
+black:
+    stage: linting
+    image: registry.gitlab.com/pipeline-components/black:latest
+    script:
+        - black --check --verbose -- .
+    only:
+        - developer
