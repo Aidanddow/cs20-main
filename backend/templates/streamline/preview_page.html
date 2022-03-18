@@ -26,7 +26,7 @@
                         {% for table in Web_Page_Tables %}
                                 <li class="list-group-item p-4">
                                         <div class="d-flex flex-row align-items-center justify-content-center">
-                                                <h4 class="mb-0">Table {{ table.0 }}</h4>
+                                                <h4 class="mb-0">Table {{ table.0 }} - page {{table.2}}</h4>
                                                 <a class="btn btn-outline-primary mb-0 mx-4" href="{% url 'download_file'  table.0 table_type %}">Download</a>
                                         </div>
                                         <div class="p-4">
