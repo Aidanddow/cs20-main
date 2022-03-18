@@ -17,11 +17,17 @@ def get_options(options_str):
     options =  { "enable_footnotes": True,
                  "force_reprocess" : False, }
 
-    if options_str:
-        options_list = [False if char.isdigit() else True for char in options_str]
-        
-        options["enable_footnotes"] = options_list[0]
-        options["force_reprocess"] = options_list[1]
+    options_list = []
+    for char in options_str:
+        if char == "1":
+            options_list.append(True)
+        else:
+            options_list.append(False)
+
+    print(options_list)
+
+    options["enable_footnotes"] = options_list[0]
+    options["force_reprocess"] = options_list[1]
 
     return options
     
