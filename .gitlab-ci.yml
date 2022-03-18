@@ -1,4 +1,4 @@
-image: python:3.9
+image: python:latest
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -10,7 +10,7 @@ cache:
 
 before_script:
     - echo "Setting up venv"
-    - pip3 install virtualenv
+    - pip install virtualenv
     - virtualenv venv
     - source venv/bin/activate
     - echo "Installing requirements"
