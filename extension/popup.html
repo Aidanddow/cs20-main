@@ -1,38 +1,59 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="button.css">
+    <link rel="stylesheet" href="button.css" />
     <style type="text/css">
-      body {width: 200px;
-            height: 200px;
-            overflow: hidden;
-            background-color: #F67571;}
+      body {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+        background-color: #f67571;
+      }
 
-            #header {text-align: center;}
-      </style>
+      #header {
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
+    <div id="header">
+      <img
+        src="Steamline Tables-logos-crop.jpeg"
+        alt="Logo"
+        style="width: 200px"
+      />
+      <hr />
+    </div>
 
     <div id="header">
-      <img src="Steamline Tables-logos-crop.jpeg" alt="Logo" style="width:200px;" >
-      <hr>
-    </div>  
-    
-    <div id="header">
-      <p><strong>Welcome to streamline table, Simply right click on a PDF or HTML table and click Streamline</strong></p>
+      <p>
+        <strong
+          >Welcome to streamline table, Simply right click on a PDF or HTML
+          table and click Streamline</strong
+        >
+      </p>
     </div>
 
     <div>
-      <input type="checkbox" id="enable_footnotes" name="enable_footnotes" value="1">
+      <input
+        type="checkbox"
+        id="enable_footnotes"
+        name="enable_footnotes"
+        value="1"
+      />
       <label for="enable_footnotes">Enable Footnotes</label>
     </div>
 
     <div>
-      <input type="checkbox" id="force_reprocess" name="force_reprocess" value="2">
+      <input
+        type="checkbox"
+        id="force_reprocess"
+        name="force_reprocess"
+        value="2"
+      />
       <label for="force_reprocess">Force Reprocess</label>
     </div>
 
     <script src="popup.js" charset="utf-8"></script>
-
   </body>
 </html>
