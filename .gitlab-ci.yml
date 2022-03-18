@@ -1,31 +1,17 @@
-image: python:latest
+image: python:3.9
 
 django_tests:
     stage: test
     tags:
         - docker
     script:
-        - echo "Installing requirements"
         - pip3 install -r backend/requirements.txt
         - pip3 install opencv-python-headless  
 
-        - echo "Migrating Django database"
         - python3 backend/manage.py makemigrations
         - python3 backend/manage.py migrate
         - python3 backend/manage.py check
 
-        - echo "Executing Django tests"
         - python3 backend/manage.py test backend/
     only:
         - developer 
-
-black:
-    stage: test
-    tags:
-        - docker
-    image: registry.gitlab.com/pipeline-components/black:latest
-    script:
-        - pip3 install black
-        - black --check --verbose -- .
-    only:
-        - developer
