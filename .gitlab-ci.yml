@@ -1,27 +1,14 @@
 image: python:latest
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-cache:
-  paths:
-    - .cache/pip
-    - venv/
-
-before_script:
-    - echo "Setting up venv"
-    - pip3 install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - echo "Installing requirements"
-    - pip3 install -r backend/requirements.txt
-    - pip3 install opencv-python-headless  
-
 django_tests:
     stage: test
     tags:
         - docker
     script:
+        - echo "Installing requirements"
+        - pip3 install -r backend/requirements.txt
+        - pip3 install opencv-python-headless  
+
         - echo "Migrating Django database"
         - python3 backend/manage.py makemigrations
         - python3 backend/manage.py migrate
@@ -39,7 +26,3 @@ black:
         - black --check --verbose -- .
     only:
         - developer
-
-
-
-
