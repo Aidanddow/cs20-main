@@ -8,16 +8,16 @@ cache:
     - .cache/pip
     - venv/
 
-before_script:
-    - echo "Setting up venv"
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - echo "Installing requirements"
-    - pip3 install -r backend/requirements.txt
-    - pip3 install opencv-python-headless  
-
 django_tests:
+    before_script:
+        - echo "Setting up venv"
+        - pip install virtualenv
+        - virtualenv venv
+        - source venv/bin/activate
+        - echo "Installing requirements"
+        - pip3 install -r backend/requirements.txt
+        - pip3 install opencv-python-headless  
+
     tags:
         - docker
     script:
