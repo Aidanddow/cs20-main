@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseNotFound
 from django.shortcuts import render
-
 from streamline.models import Table_HTML, Url_HTML, Url_PDF
 
 from .utils import generics, html_to_csv, pdf_to_csv
@@ -25,7 +24,7 @@ def get_tables_from_html(request):
     # Try to find tables in database
     html_obj = Url_HTML.objects.filter(url=url).first()
 
-    # If not in database or reprocess is on
+    # If not in database or reprocess is off
     if not html_obj and not "force_reprocess" in options.keys():
         # store URL
         html_obj = Url_HTML.objects.create(url=url)

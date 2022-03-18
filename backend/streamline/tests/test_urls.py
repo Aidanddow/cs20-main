@@ -1,6 +1,5 @@
 from django.test import SimpleTestCase
 from django.urls import resolve, reverse
-
 from streamline.views import (download_file, get_tables_from_html,
                               get_tables_from_pdf)
 

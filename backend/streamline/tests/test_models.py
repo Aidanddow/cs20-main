@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.test import TestCase
-
 from streamline.models import Table_HTML, Table_PDF, Url_HTML, Url_PDF
 
 

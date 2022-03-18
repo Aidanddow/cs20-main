@@ -1,15 +1,8 @@
-"""
-Download tables from pdf from terminal with
-
-% python download_pdf.py <filename>
-"""
 import os
-import sys
 import urllib.request
 import uuid
 
 import camelot
-
 from streamline.models import Table_PDF
 
 HEADERS = {

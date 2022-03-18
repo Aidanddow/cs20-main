@@ -5,8 +5,8 @@ from zipfile import ZipFile
 
 import pandas as pd
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
-
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseNotFound)
 from streamline.models import Table_HTML, Table_PDF
 
 

@@ -1,6 +1,5 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-
 from streamline.models import Table_HTML, Table_PDF, Url_HTML, Url_PDF
 
 

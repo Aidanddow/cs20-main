@@ -1,12 +1,9 @@
 import os
-import sys
-from pathlib import Path
 
 import requests
 import xlwt
 from bs4 import BeautifulSoup
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
 from streamline.models import Table_HTML
 
 from . import generics
