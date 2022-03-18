@@ -23,9 +23,15 @@ Running the Django app backend requires python version 3.8 or later, this can be
 The First time you download the file run the Install.bat file - this will install all the python packages for the backend.\
 Then when you want to run the Streamline Table run the Start.bat file - While the terminal is running you will be able to use the extension freely. 
 
-### Automatically - Mac 
+### Mac/Linux 
 
-
+From the terminal, navigate to the cs20-main folder, then:
+```
+% cd backend
+% python -m venv venv
+% source venv/bin/activate
+% pip install -r requirements.txt
+```
 
 ### Manually 
 Setup the django models from the backend folder with
