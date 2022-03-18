@@ -14,7 +14,8 @@ Right click on the desired table, and the data will be downloaded as a .xls file
 
 ## Setup
 
-Load Chrome extension in Chrome by going to Settings->Extensions->Load Unpacked, then selecting the project extension folder.
+Load Chrome extension in Chrome by going to Settings->Extensions->Load Unpacked, then selecting the project extension folder.\
+Running the Django app backend requires python version 3.8 or later, this can be found here - https://www.python.org/downloads/
 
 
 ### Automatically
