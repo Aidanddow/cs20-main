@@ -21,6 +21,8 @@ django_tests:
 
 black:
     stage: test
+    tags:
+        - docker
     image: registry.gitlab.com/pipeline-components/black:latest
     script:
         - pip3 install black
