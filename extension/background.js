@@ -1,4 +1,5 @@
-var serverhost = "http://127.0.0.1:8000";
+var serverhost = "http://ihwserver.mvls.gla.ac.uk:8020";
+// var serverhost = "http://127.0.0.1:8000"
 var download_page = serverhost + "/streamline/download_page/";
 
 //Creates context menu in right click menu and listener

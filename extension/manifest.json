@@ -34,7 +34,8 @@
     "contextMenus",
     "tabs",
     "storage",
-    "http://127.0.0.1:8000/",
+    // "http://127.0.0.1:8000",
+    "http://ihwserver.mvls.gla.ac.uk/8020",
     "background",
     "identity",
     "notifications"
