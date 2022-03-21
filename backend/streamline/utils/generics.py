@@ -154,9 +154,7 @@ def get_data_from_request(request, get_pages=False):
         print("--- No Pages found")
         return HttpResponseBadRequest("<h1>Invalid Request</h1>")
 
-    options_dict = {}
-    if options:
-        options_dict = get_options(options)
+    options_dict = get_options(options)
 
     print(f"\n--- Url: {url}")
     print(f"--- Options: {options_dict}")

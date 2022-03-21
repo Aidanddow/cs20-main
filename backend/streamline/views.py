@@ -24,8 +24,8 @@ def get_tables_from_html(request):
     # Try to find tables in database
     html_obj = Url_HTML.objects.filter(url=url).first()
 
-    # If not in database or reprocess is off
-    if not html_obj and not "force_reprocess" in options.keys():
+    # If not in database OR is in database but reprocess is off
+    if (html_obj and options["force_reprocess"]) or not html_obj:
         # store URL
         html_obj = Url_HTML.objects.create(url=url)
         print("--- New HTML URL:", html_obj.url)
@@ -33,13 +33,13 @@ def get_tables_from_html(request):
         # process page
         html_to_csv.extract(url, html_obj, options, save_path=CSV_PATH)
 
-    # Query extracted tables
+        # Query extracted tables
 
     if tables_obj := Table_HTML.objects.filter(html_id=html_obj.id):
         context_dict = generics.create_context(html_obj, tables_obj, table_type="html")
         return render(request, "streamline/preview_page.html", context=context_dict)
-    else:
-        return render(request, "streamline/no_tables.html", context={})
+    
+    return render(request, "streamline/no_tables.html", context={})
 
 
 def get_tables_from_pdf(request):
