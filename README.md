@@ -17,33 +17,9 @@ Right click on the desired table, and the data will be downloaded as a .xls file
 Load Chrome extension in Chrome by going to Settings->Extensions->Load Unpacked, then selecting the project extension folder.\
 Running the Django app backend requires python version 3.8 or later, this can be found here - https://www.python.org/downloads/
 
+## Django backend 
+This should be running on an external server, access to it requires being on the University of Glasgow's network or using the VPN.
 
-### Automatically - Windows 
-
-The First time you download the file run the Install.bat file - this will install all the python packages for the backend.\
-Then when you want to run the Streamline Table run the Start.bat file - While the terminal is running you will be able to use the extension freely. 
-
-### Mac/Linux 
-
-From the terminal, navigate to the cs20-main folder, then:
-```
-% cd backend
-% python -m venv venv
-% source venv/bin/activate
-% pip install -r requirements.txt
-```
-
-### Manually 
-Setup the django models from the backend folder with
-```
-% rm db.sqlite3
-% python manage.py makemigrations streamline
-% python manage.py migrate
-```
-Then run the django webapp with
-```
-% python manage.py runserver
-```
 
 ## Run Instructions
 
